@@ -2,6 +2,8 @@ import 'dart:ui';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:whiteboard_ifp/canvas/ink_controller.dart';
+import 'package:whiteboard_ifp/canvas/ink_painters.dart';
+import 'package:whiteboard_ifp/canvas/stroke.dart';
 import 'package:whiteboard_ifp/ui/theme.dart';
 
 void main() {
@@ -145,6 +147,35 @@ void main() {
           expect(p.y, inInclusiveRange(0, 1080));
         }
       }
+    },
+  );
+
+  test(
+    'the picture cache redraws items the controller adds or swaps in place',
+    () {
+      final cache = InkPictureCache(chunkSize: 2);
+      expect(cache.chunksFor(ink.committedItems), isEmpty);
+      drawLine(1, const Offset(0, 0), const Offset(50, 0));
+      expect(cache.chunksFor(ink.committedItems), hasLength(1));
+      drawLine(2, const Offset(0, 10), const Offset(50, 10));
+      drawLine(3, const Offset(0, 20), const Offset(50, 20));
+      expect(cache.chunksFor(ink.committedItems), hasLength(2));
+      final first = cache.chunksFor(ink.committedItems).first;
+      ink.addItem(
+        TableItem(
+          id: 't',
+          rect: const Rect.fromLTWH(0, 40, 100, 40),
+          cells: TableItem.blank(2, 2),
+        ),
+      );
+      final last = cache.chunksFor(ink.committedItems).last;
+      ink.updateTable('t', [
+        ['x', 'y'],
+        ['1', '2'],
+      ]);
+      final chunks = cache.chunksFor(ink.committedItems);
+      expect(chunks.first, same(first), reason: 'unchanged chunk kept');
+      expect(chunks.last, isNot(same(last)), reason: 'edited table redrawn');
     },
   );
 }

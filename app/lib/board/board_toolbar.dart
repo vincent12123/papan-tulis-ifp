@@ -49,6 +49,7 @@ class BoardToolbar extends StatelessWidget {
     required this.onMenu,
     required this.onMove,
     required this.onImage,
+    this.onTable,
   });
 
   /// Height of the bar: a tool button plus padding.
@@ -65,6 +66,9 @@ class BoardToolbar extends StatelessWidget {
 
   /// Gambar: pick a picture and insert it (an action, not a mode).
   final VoidCallback onImage;
+
+  /// Tabel: insert a table (REQ-21); an action, not a mode.
+  final VoidCallback? onTable;
 
   String get _moveLabel => switch (dock) {
     ToolbarDock.left => 'Pindahkan bilah alat ke tengah',
@@ -116,6 +120,13 @@ class BoardToolbar extends StatelessWidget {
                 selected: false,
                 onTap: onImage,
               ),
+              if (onTable != null)
+                ToolButton(
+                  icon: Icons.table_chart_outlined,
+                  label: 'Tabel',
+                  selected: false,
+                  onTap: onTable!,
+                ),
               ToolButton(
                 icon: Icons.science_outlined,
                 label: 'Peraga',

@@ -21,7 +21,9 @@ bool eraserTouchesItem(PageItem item, Offset center, double radius) =>
       TextItem() ||
       SolidItem() ||
       PeragaItem() ||
-      QuizItem() => false,
+      QuizItem() ||
+      TableItem() ||
+      ChartItem() => false,
     };
 
 /// Whether an eraser circle at [center] with [radius] touches [stroke]:

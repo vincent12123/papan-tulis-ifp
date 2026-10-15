@@ -409,3 +409,105 @@ class QuizItem extends PageItem {
   QuizItem copyAs(String newId) =>
       QuizItem(id: newId, rect: rect, title: title, pairs: pairs, z: z);
 }
+
+/// A table the teacher types into (jenis = tabel, REQ-21). Row 0 holds the
+/// column titles; column 0 holds x values or category names; the other
+/// columns are number series. Cells keep exactly what was typed.
+class TableItem extends PageItem {
+  TableItem({
+    required super.id,
+    required this.rect,
+    required this.cells,
+    super.z,
+  });
+
+  /// Rows count the title row too.
+  static const minRows = 2, maxRows = 20, minCols = 2, maxCols = 6;
+
+  /// Longest text a cell keeps.
+  static const maxCellLength = 24;
+
+  final Rect rect;
+
+  /// [row][column]; every row has the same length.
+  final List<List<String>> cells;
+
+  int get rows => cells.length;
+  int get cols => cells.first.length;
+
+  /// Empty table with [rows] × [cols] cells.
+  static List<List<String>> blank(int rows, int cols) => [
+    for (var r = 0; r < rows; r++) List.filled(cols, ''),
+  ];
+
+  @override
+  Rect get bounds => rect;
+
+  TableItem withRect(Rect r) => TableItem(id: id, rect: r, cells: cells, z: z);
+
+  TableItem withCells(List<List<String>> c) =>
+      TableItem(id: id, rect: rect, cells: c, z: z);
+
+  TableItem copyAs(String newId) =>
+      TableItem(id: newId, rect: rect, cells: cells, z: z);
+}
+
+/// Kinds of chart made from a table (REQ-21).
+enum ChartKind {
+  garis('Garis'),
+  batang('Batang'),
+  titik('Titik');
+
+  const ChartKind(this.label);
+  final String label;
+}
+
+/// A chart drawn from a table (stored as jenis = grafik, REQ-21). It keeps
+/// its own copy of the table cells, so it still shows the last data after
+/// the table is deleted; while table [tableId] is on the page, editing the
+/// table updates this copy in the same step.
+class ChartItem extends PageItem {
+  ChartItem({
+    required super.id,
+    required this.rect,
+    required this.kind,
+    required this.tableId,
+    required this.cells,
+    super.z,
+  });
+
+  final Rect rect;
+  final ChartKind kind;
+  final String tableId;
+  final List<List<String>> cells;
+
+  @override
+  Rect get bounds => rect;
+
+  ChartItem withRect(Rect r) => ChartItem(
+    id: id,
+    rect: r,
+    kind: kind,
+    tableId: tableId,
+    cells: cells,
+    z: z,
+  );
+
+  ChartItem withCells(List<List<String>> c) => ChartItem(
+    id: id,
+    rect: rect,
+    kind: kind,
+    tableId: tableId,
+    cells: c,
+    z: z,
+  );
+
+  ChartItem copyAs(String newId, {String? tableId}) => ChartItem(
+    id: newId,
+    rect: rect,
+    kind: kind,
+    tableId: tableId ?? this.tableId,
+    cells: cells,
+    z: z,
+  );
+}

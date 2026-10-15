@@ -96,6 +96,7 @@ app/                       Aplikasi Flutter (Android)
   lib/boards/              SCR-02 Daftar Papan
   lib/data/                SQLite: skema (app_database), repository, codec objek, media_store (berkas gambar/latar)
   lib/app_shell.dart       Alur buka aplikasi (papan terakhir), memuat, papan rusak
+  lib/table/               Tabel → grafik (REQ-21): data sel, penggambar tabel & grafik data, dialog isi tabel
   lib/diagnostics/         Alat ukur uji panel (hanya di APK uji: --dart-define=DIAGNOSTICS=true)
   test/                    Test per acceptance criteria (nama berisi ID AC)
   test/support/            Repository tiruan di memori untuk test layar
@@ -186,4 +187,5 @@ verification/              acceptance-criteria.md
 - 2026-10-14 VPS karyabangsa adalah produksi: pemeriksaan baca-saja boleh, tetapi setiap perubahan (berkas, systemd, nginx, cloudflared) wajib dikonfirmasi pemilik lebih dulu. Kunci API dan PIN diisi pemilik sendiri di server, tidak lewat AI.
 - 2026-10-14 Izin `INTERNET` Flutter hanya ada di manifest debug; APK rilis tanpa izin itu di `src/main/AndroidManifest.xml` gagal "tidak bisa terhubung" walau server sehat (dijaga `test/android_manifest_test.dart`). Cek log akses nginx server: bila permintaan panel tidak tercatat, masalahnya di perangkat.
 - 2026-10-15 APK yang dikirim ke pemilik untuk dipakai/diuji guru dibangun **tanpa** `DIAGNOSTICS` (`dist/papan-tulis.apk`); alat ukur di bilah atas membuat UI tampak tidak profesional. Tinjau UI lewat `app/tool/screenshots_test.dart` (1920×1080, font Roboto asli).
+- 2026-10-15 Test model (items) tidak menangkap bug gambar: `InkPictureCache` pernah menyimpan alias list controller sehingga perubahan di tempat tak tergambar. Untuk fitur kanvas baru, cek juga screenshot (`tool/screenshots_test.dart`, panggil `_settle` sebelum `_shot`) dan test cache.
 - 2026-10-14 Jangan `dispose()` ValueNotifier yang masih bisa diubah oleh penulisan async yang tertunda (lihat `SaveQueue._disposed`).

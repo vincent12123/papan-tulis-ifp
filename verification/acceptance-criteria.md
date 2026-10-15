@@ -171,14 +171,25 @@
 
 | ID | Requirement | Kriteria (Diberikan / Ketika / Maka) | Jenis | Cara cek | Status | Bukti |
 |---|---|---|---|---|---|---|
-| AC-180 | REQ-21 | **Diberikan** papan, **ketika** Tabel → 4 baris × 3 kolom → Sisipkan, **maka** tabel kosong 4 × 3 muncul di tengah layar dan terpilih; satu Undo menghapusnya; tabel tersimpan bersama papan | Positif | AUTO | ☐ | |
-| AC-181 | REQ-21 | **Diberikan** tabel, **ketika** sel diketuk dengan Pena lalu "12,5" diketik, **maka** sel berisi 12,5 (dibaca sebagai angka 12.5), tidak ada tinta di badan tabel, dan satu Undo mengembalikan isi lama; dengan Geser, ketukan tidak membuka keyboard | Positif / Negatif | AUTO | ☐ | |
-| AC-182 | REQ-21 | **Diberikan** tabel 20 baris atau 6 kolom, **ketika** Tambah baris / Tambah kolom, **maka** ditolak dengan pesan batas dan tabel tidak berubah; pilihan di bawah 2 atau di atas batas tidak bisa disisipkan | Negatif | AUTO | ☐ | |
-| AC-183 | REQ-21 | **Diberikan** tabel berangka di kolom pertama dan 2 seri, **ketika** Jadikan grafik → Garis / Batang / Titik, **maka** grafik muncul di samping tabel dengan 2 seri, sumbu menyesuaikan nilai, legenda bertuliskan judul kolom; bila kolom pertama berisi teks hanya Batang yang bisa dipilih (batang berkelompok) | Positif / Negatif | AUTO | ☐ | |
-| AC-184 | REQ-21 | **Diberikan** grafik dari tabel, **ketika** angka di tabel diubah, **maka** grafik langsung berubah dan tersimpan; sel kosong/bukan angka dilewati dan ditandai (garis bawah + ikon); tabel tanpa angka → pesan, tidak ada grafik | Positif / Negatif | AUTO | ☐ | |
-| AC-185 | REQ-21 | **Diberikan** panel tanpa internet dan tanpa pengaturan server, **ketika** Jadikan grafik dari tabel, **maka** grafik tetap dibuat dan tidak ada panggilan ke server | Negatif | AUTO | ☐ | |
-| AC-186 | REQ-21 | **Diberikan** tabel dan grafiknya, **ketika** aplikasi dibuka ulang, **maka** keduanya utuh dan masih terhubung; **ketika** tabel dihapus, **maka** grafik tetap dengan data terakhir dan tidak terhubung lagi; Penghapus tidak menghapus tabel | Positif / Negatif | AUTO | ☐ | |
-| AC-187 | REQ-21 | **Diberikan** panel Hisense, **ketika** guru mengisi tabel 5 × 3 dengan keyboard layar lalu membuat grafik, **maka** selesai tanpa bantuan, teks sel ≥ 20 sp terbaca dari belakang kelas, dan menulis di luar tabel tetap mulus (NFR-30) | Positif | MANUAL | ☐ | |
+| AC-180 | REQ-21 | **Diberikan** papan, **ketika** Tabel → 4 baris × 3 kolom → Sisipkan, **maka** tabel kosong 4 × 3 muncul di tengah layar dan terpilih; satu Undo menghapusnya; tabel tersimpan bersama papan | Positif | AUTO | ✅ | 2026-10-15: table_test (AC-180) |
+| AC-181 | REQ-21 | **Diberikan** tabel, **ketika** sel diketuk dengan Pena lalu "12,5" diketik, **maka** sel berisi 12,5 (dibaca sebagai angka 12.5), tidak ada tinta di badan tabel, dan satu Undo mengembalikan isi lama; dengan Geser, ketukan tidak membuka keyboard | Positif / Negatif | AUTO | ✅ | 2026-10-15: table_test (AC-181; juga Batal tidak mengubah tabel, parseCell) |
+| AC-182 | REQ-21 | **Diberikan** tabel 20 baris atau 6 kolom, **ketika** Tambah baris / Tambah kolom, **maka** ditolak dengan pesan batas dan tabel tidak berubah; pilihan di bawah 2 atau di atas batas tidak bisa disisipkan | Negatif | AUTO | ✅ | 2026-10-15: table_test (AC-182) |
+| AC-183 | REQ-21 | **Diberikan** tabel berangka di kolom pertama dan 2 seri, **ketika** Jadikan grafik → Garis / Batang / Titik, **maka** grafik muncul di samping tabel dengan 2 seri, sumbu menyesuaikan nilai, legenda bertuliskan judul kolom; bila kolom pertama berisi teks hanya Batang yang bisa dipilih (batang berkelompok) | Positif / Negatif | AUTO | ✅ | 2026-10-15: table_test (AC-183 ×2, grafik di samping tidak menimpa tabel); screenshot 12-tabel-grafik |
+| AC-184 | REQ-21 | **Diberikan** grafik dari tabel, **ketika** angka di tabel diubah, **maka** grafik langsung berubah dan tersimpan; sel kosong/bukan angka dilewati; sel bukan angka ditandai (garis bawah + ikon); tabel tanpa angka → pesan, tidak ada grafik | Positif / Negatif | AUTO | ✅ | 2026-10-15: table_test (AC-184, isBadCell); ink_controller_test (gambar ulang setelah tabel diubah) |
+| AC-185 | REQ-21 | **Diberikan** panel tanpa internet dan tanpa pengaturan server, **ketika** Jadikan grafik dari tabel, **maka** grafik tetap dibuat dan tidak ada panggilan ke server | Negatif | AUTO | ✅ | 2026-10-15: table_test (FakeServer tanpa permintaan; tanpa pengaturan server di AC-183/184) |
+| AC-186 | REQ-21 | **Diberikan** tabel dan grafiknya, **ketika** aplikasi dibuka ulang, **maka** keduanya utuh dan masih terhubung; **ketika** tabel dihapus, **maka** grafik tetap dengan data terakhir dan tidak terhubung lagi; Penghapus tidak menghapus tabel | Positif / Negatif | AUTO | ✅ | 2026-10-15: table_test (codec + data rusak ditolak, buka ulang, hapus tabel, Penghapus) |
+| AC-187 | REQ-21 | **Diberikan** panel Hisense, **ketika** guru mengisi tabel 5 × 3 dengan keyboard layar lalu membuat grafik, **maka** selesai tanpa bantuan, teks sel ≥ 20 sp terbaca dari belakang kelas, dan menulis di luar tabel tetap mulus (NFR-30) | Positif | MANUAL | ⏳ | Menunggu uji di panel |
+
+### G8. Bahasa Mandarin (REQ-30)
+
+| ID | Requirement | Kriteria (Diberikan / Ketika / Maka) | Jenis | Cara cek | Status | Bukti |
+|---|---|---|---|---|---|---|
+| AC-190 | REQ-30 | **Diberikan** area berisi Hanzi tulisan tangan, **ketika** dilingkari, **maka** bilah menu pintar menawarkan "Pinyin & arti"; area tanpa aksara Han tidak menawarkannya | Positif / Negatif | AUTO | ☐ | |
+| AC-191 | REQ-30 | **Diberikan** teks 你好 / 学习 / 好好学习，天天向上, **ketika** server mengolahnya, **maka** pinyin bertanda nada benar (nǐ hǎo, xué xí, …) berasal dari pypinyin dan arti per kata dari kamus, bukan dari AI | Positif | AUTO | ☐ | |
+| AC-192 | REQ-30 | **Diberikan** AI mati atau terlalu lama, **ketika** Pinyin & arti, **maka** kartu tetap muncul dengan pinyin + arti per kata tanpa terjemahan kalimat (tanpa data contoh); tanpa jaringan/PIN → pesan menu pintar yang ada dan papan tidak berubah; tanpa PIN server menolak (401) | Negatif | AUTO | ☐ | |
+| AC-193 | REQ-30 | **Diberikan** kartu Mandarin, **ketika** dipindah/diubah ukuran/dihapus/Undo dan aplikasi dibuka ulang, **maka** perilaku seperti gambar dan kartu tersimpan utuh; terjemahan AI berlabel "Terjemahan AI — periksa sebelum dipakai" | Positif | AUTO | ☐ | |
+| AC-194 | REQ-30 | **Diberikan** panel dengan suara zh-CN, **ketika** Dengarkan / Pelan / ketuk kata, **maka** terdengar Hanzi yang sesuai; tanpa suara zh-CN tombol suara tersembunyi dan pesan cara memasang tampil | Positif / Negatif | AUTO + MANUAL | ☐ | |
+| AC-195 | REQ-30 | **Diberikan** 20 contoh Hanzi tulisan tangan guru Mandarin di panel, **ketika** dilingkari, **maka** pengenalan cukup akurat menurut guru (target usulan ≥ 16/20 benar; sisanya ditolak, bukan salah diam-diam) | Positif | MANUAL | ☐ | |
 
 ## H. Pengaturan (SPEC 5.8)
 
@@ -288,7 +299,8 @@
 | REQ-18 | SCR-01, SCR-04, SCR-05 | AC-34, AC-65, AC-76 | ☐ |
 | REQ-19 | SCR-05, SCR-06 | AC-78–AC-82, AC-94–AC-99 | ☐ |
 | REQ-20 | SCR-01, SCR-05 | AC-83–AC-88 | ☐ |
-| REQ-21 | SCR-01 (Tabel, Jadikan grafik dari tabel) | AC-180–AC-187 | ☐ |
+| REQ-21 | SCR-01 (Tabel, Jadikan grafik dari tabel) | AC-180–AC-187 | ⏳ uji panel (AC-180–186 ✅) |
+| REQ-30 | SCR-01 (menu pintar, kartu Mandarin) | AC-190–AC-195 | ☐ |
 | REQ-22 | SCR-01 (menu pintar) | AC-100–AC-104 | ⏳ uji panel |
 | REQ-23 | SCR-01 (Bentuk → bangun ruang) | AC-110–AC-113 | ⏳ uji panel |
 | REQ-24 | SCR-01 (menu pintar kimia, video) | AC-120–AC-121 | ⏳ uji panel |

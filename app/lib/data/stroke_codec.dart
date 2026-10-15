@@ -15,6 +15,7 @@ abstract final class ObjectKind {
   static const solid = 'bangun';
   static const peraga = 'peraga';
   static const quiz = 'kuis';
+  static const table = 'tabel';
 
   static String of(PageItem item) => switch (item) {
     Stroke() => stroke,
@@ -25,6 +26,8 @@ abstract final class ObjectKind {
     SolidItem() => solid,
     PeragaItem() => peraga,
     QuizItem() => quiz,
+    TableItem() => table,
+    ChartItem() => graph,
   };
 }
 
@@ -71,6 +74,26 @@ abstract final class ItemCodec {
       'pasangan': [
         for (final (a, b) in item.pairs) [a, b],
       ],
+    }),
+    TableItem() => jsonEncode({
+      'v': 1,
+      'x': _round(item.rect.left),
+      'y': _round(item.rect.top),
+      'w': _round(item.rect.width),
+      'h': _round(item.rect.height),
+      'sel': item.cells,
+    }),
+    // A chart from a table shares jenis = grafik with formula graphs; its
+    // 'jenis' field tells them apart (SPEC §4.3).
+    ChartItem() => jsonEncode({
+      'v': 1,
+      'jenis': item.kind.name,
+      'tabel': item.tableId,
+      'x': _round(item.rect.left),
+      'y': _round(item.rect.top),
+      'w': _round(item.rect.width),
+      'h': _round(item.rect.height),
+      'sel': item.cells,
     }),
     SolidItem() => jsonEncode({
       'v': 1,
@@ -188,7 +211,17 @@ abstract final class ItemCodec {
           color: Color(j['c'] as int),
         );
       case ObjectKind.graph:
-        return _decodeGraph(id, z, _map(id, data));
+        final j = _map(id, data);
+        if (j.containsKey('jenis')) return _decodeChart(id, z, j);
+        return _decodeGraph(id, z, j);
+      case ObjectKind.table:
+        final j = _map(id, data);
+        final rect = _rect(j);
+        final cells = _cells(j['sel']);
+        if (rect == null || cells == null) {
+          throw FormatException('Tabel $id rusak');
+        }
+        return TableItem(id: id, z: z, rect: rect, cells: cells);
       case ObjectKind.peraga:
         final j = _map(id, data);
         final kind = PeragaKind.values.where((k) => k.name == j['jenis']);
@@ -318,6 +351,59 @@ abstract final class ItemCodec {
     } on FormatException {
       throw FormatException('Grafik $id rusak');
     }
+  }
+
+  static ChartItem _decodeChart(String id, int z, Map<dynamic, dynamic> j) {
+    final kind = ChartKind.values.where((k) => k.name == j['jenis']);
+    final rect = _rect(j);
+    final cells = _cells(j['sel']);
+    if (kind.isEmpty ||
+        j['tabel'] is! String ||
+        rect == null ||
+        cells == null) {
+      throw FormatException('Grafik $id rusak');
+    }
+    return ChartItem(
+      id: id,
+      z: z,
+      rect: rect,
+      kind: kind.first,
+      tableId: j['tabel'] as String,
+      cells: cells,
+    );
+  }
+
+  static Rect? _rect(Map<dynamic, dynamic> j) {
+    final values = [j['x'], j['y'], j['w'], j['h']];
+    if (values.any((v) => v is! num)) return null;
+    final v = values.cast<num>();
+    return Rect.fromLTWH(
+      v[0].toDouble(),
+      v[1].toDouble(),
+      v[2].toDouble(),
+      v[3].toDouble(),
+    );
+  }
+
+  /// Table cells: a rectangle of strings within the table limits.
+  static List<List<String>>? _cells(Object? raw) {
+    if (raw is! List ||
+        raw.length < TableItem.minRows ||
+        raw.length > TableItem.maxRows) {
+      return null;
+    }
+    final rows = <List<String>>[];
+    for (final row in raw) {
+      if (row is! List ||
+          row.length < TableItem.minCols ||
+          row.length > TableItem.maxCols ||
+          row.any((c) => c is! String || c.length > 100) ||
+          (rows.isNotEmpty && row.length != rows.first.length)) {
+        return null;
+      }
+      rows.add(row.cast<String>().toList());
+    }
+    return rows;
   }
 
   static Map<dynamic, dynamic> _map(String id, String data) {

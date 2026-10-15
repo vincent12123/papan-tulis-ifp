@@ -12,6 +12,10 @@ import 'package:whiteboard_ifp/canvas/stroke.dart';
 import 'package:whiteboard_ifp/peraga/peraga_specs.dart';
 import 'package:whiteboard_ifp/server/settings_store.dart';
 import 'package:whiteboard_ifp/solid/solid_geometry.dart';
+import 'package:whiteboard_ifp/table/table_painter.dart';
+
+import 'package:flutter/widgets.dart' show ValueKey;
+import 'package:whiteboard_ifp/canvas/ink_canvas.dart';
 
 import '../test/support/app_harness.dart';
 import '../test/support/fake_server.dart';
@@ -200,5 +204,61 @@ void main() {
     s.selectedLeft = 2;
     await tester.pump();
     await _shot(tester, '9-kuis-kapur');
+  });
+
+  testWidgets('tabel dan grafik', (tester) async {
+    await tester.runAsync(_loadFonts);
+    await pumpApp(tester);
+    await tester.tap(find.text('Tabel'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Kurangi Baris'));
+    await tester.pumpAndSettle();
+    await _shot(tester, '10-sisipkan-tabel');
+    await tester.tap(find.text('Sisipkan'));
+    await tester.pumpAndSettle();
+    final ink = inkOf(tester);
+    final table = ink.items.whereType<TableItem>().single;
+    const cells = [
+      ['Minggu', 'Kelas A', 'Kelas B'],
+      ['1', '72', '68'],
+      ['2', '78,5', '74'],
+      ['3', '85', 'sakit'],
+    ];
+    final canvas = tester.getTopLeft(find.byType(InkCanvas));
+    await tester.tapAt(
+      canvas +
+          tester
+              .widget<InkCanvas>(find.byType(InkCanvas))
+              .viewport!
+              .toScreen(TableLayout(table).cell(1, 1).center),
+    );
+    await tester.pumpAndSettle();
+    for (var r = 0; r < 4; r++) {
+      for (var c = 0; c < 3; c++) {
+        await tester.enterText(find.byKey(ValueKey('sel-$r-$c')), cells[r][c]);
+      }
+    }
+    await tester.pump();
+    await _shot(tester, '11-isi-tabel');
+    await tester.tap(find.text('Simpan'));
+    await tester.pumpAndSettle();
+    final filled = ink.items.whereType<TableItem>().single;
+    await tester.tap(find.text('Pilih'));
+    await tester.pump();
+    await tester.tapAt(
+      canvas +
+          tester
+              .widget<InkCanvas>(find.byType(InkCanvas))
+              .viewport!
+              .toScreen(filled.rect.center),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Jadikan grafik'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Garis'));
+    await tester.pumpAndSettle();
+    ink.select(filled.id);
+    await _settle(tester);
+    await _shot(tester, '12-tabel-grafik');
   });
 }

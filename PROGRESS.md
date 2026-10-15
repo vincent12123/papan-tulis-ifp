@@ -7,12 +7,15 @@
 
 ## Status Saat Ini
 
-- **Checkpoint aktif:** 11–14 selesai di kode. Berikutnya: **Checkpoint 15 Tabel → grafik (REQ-21, disetujui SPEC 1.12)**; lalu uji semuanya di panel (Checkpoint 16). Usulan REQ-30 Mandarin (SPEC §12 1.13) menunggu persetujuan rincian.
-- **Versi SPEC yang dipakai:** 1.12 (ux-flow 1.8)
+- **Checkpoint aktif:** 15 Tabel → grafik selesai di kode (AC-180–AC-186 ✅, AC-187 ⏳ panel). Berikutnya: **Checkpoint 16 Mandarin (REQ-30, SPEC 1.13 disetujui)** — mulai dari uji akurasi pengenal Hanzi tulisan tangan di VPS dan cek suara zh-CN di panel Hisense; lalu uji semuanya di panel (Checkpoint 17).
+- **Versi SPEC yang dipakai:** 1.13 (ux-flow 1.8)
 - **Terakhir diperbarui:** 2026-10-15 oleh AI
 - **Repo:** https://github.com/vincent12123/papan-tulis-ifp (publik, branch main)
 
 ## ✅ Sudah Selesai
+- **Checkpoint 15 — Tabel → grafik (REQ-21, 2026-10-15):** `lib/table/` (table_data: baca angka koma/titik, seri, sumbu bulat; table_painter: sel + tanda sel bukan angka; chart_painter: Garis/Batang berkelompok/Titik, penanda bentuk berbeda per seri + legenda; table_editor: dialog Sisipkan tabel & Isi tabel). Objek `TableItem` (jenis `tabel`) dan `ChartItem` (jenis `grafik` + field `jenis`, salinan sel + id tabel) di `stroke.dart` + codec; `InkController.updateTable` (tabel + grafiknya satu Undo, `ReplaceMany`); ketukan sel di `InkCanvas.onTableCell`; tombol Tabel di bilah alat; tombol tabel di bawah tabel; grafik ditaruh di samping tabel tanpa menimpa. Tanpa server, tanpa dependency baru. 13 test baru (`test/table_test.dart`) + screenshot 10–12.
+- **Perbaikan bug lama (2026-10-15):** `InkPictureCache` menyimpan alias list item controller, sehingga item yang ditambah/diganti di tempat tidak digambar ulang selama halaman tanpa kuis/peraga berjalan (terbukti: test regresi gagal dengan kode lama). Kini menyimpan salinan list. Perlu dicek di panel bahwa goresan tetap tampil setelah jari diangkat.
+- **SPEC 1.13 (2026-10-15):** REQ-30 Mandarin disetujui (Checkpoint 16; AC-190–AC-195).
 - **SPEC 1.12 (2026-10-15):** REQ-21 Tabel → grafik disetujui dan diterapkan (§3.1, §4.3 jenis `tabel`, §5.4, Checkpoint 15); AC-180–AC-187; pola Tabel di ux-flow 1.8 (teks usulan). Kode tempelan dari luar (OCR tabel AI + Mandarin) ditinjau dan tidak dipakai.
 - **Checkpoint 11–14 (REQ-26–29 + sketsa REQ-23):** `lib/peraga/` (katalog 8 peraga + rumus, penggambar adegan, kuis + editor), lapisan hidup `LiveItemsPainter` + ticker di `InkCanvas` (hanya jalan saat ada peraga diputar), objek `peraga` & `kuis` (codec), tombol "Peraga", menu pintar `smart_suggest.dart` (saran peraga, sketsa → bangun), goresan kapur (tekstur butiran, field `k`), tema papan (app_state per papan); server: jenis AI `kuis` (`parse_quiz`).
 - **Checkpoint 8 — Bangun ruang 3D (REQ-23):** `lib/solid/` (geometri + jaring berengsel + penggambar sendiri), objek `bangun` (codec), menu Bentuk baris kedua, putar dengan jari, tombol Jaring-jaring (animasi) / Bidang potong di dalam objek.

@@ -95,6 +95,18 @@ abstract final class PenColors {
   ];
 }
 
+/// Series of a chart made from a table (REQ-21), in column order.
+abstract final class ChartColors {
+  static const series = [
+    PenColors.blue,
+    PenColors.red,
+    PenColors.green,
+    PenColors.purple,
+    PenColors.orange,
+  ];
+  static const grid = Color(0xFFE5E7EB);
+}
+
 abstract final class PenWidths {
   static const thin = 3.0;
   static const medium = 6.0;

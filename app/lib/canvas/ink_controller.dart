@@ -10,6 +10,7 @@ import 'media_images.dart';
 import '../peraga/peraga_painter.dart';
 import '../peraga/quiz_painter.dart';
 import '../solid/solid_painter.dart';
+import '../table/table_painter.dart';
 import 'shapes.dart';
 import 'stroke.dart';
 
@@ -41,6 +42,12 @@ class ReplaceItem extends InkAction {
   ReplaceItem(this.before, this.after);
   final PageItem before;
   final PageItem after;
+}
+
+/// Several items changed in place as one step (a table and its charts).
+class ReplaceMany extends InkAction {
+  ReplaceMany(this.changes);
+  final List<(PageItem before, PageItem after)> changes;
 }
 
 /// Receives every change to the committed items so they can be saved
@@ -468,6 +475,8 @@ class InkController {
       SolidItem() => original.withRect(to),
       PeragaItem() => original.withRect(to),
       QuizItem() => original.withRect(to),
+      TableItem() => original.withRect(to),
+      ChartItem() => original.withRect(to),
       Stroke() => original,
     };
     activeRevision.value++;
@@ -487,6 +496,48 @@ class InkController {
     }
     return null;
   }
+
+  // --- tables and their charts (REQ-21) ------------------------------------
+
+  /// Topmost table under [at] and the cell there; null when something else
+  /// is on top or nothing is there.
+  ({TableItem table, int row, int col})? hitTableCell(Offset at) {
+    for (var i = _items.length - 1; i >= 0; i--) {
+      final item = _items[i];
+      if (!item.bounds.contains(at)) continue;
+      if (item is! TableItem) return null;
+      final cell = TableLayout(item).cellAt(at);
+      return cell == null ? null : (table: item, row: cell.row, col: cell.col);
+    }
+    return null;
+  }
+
+  /// Gives table [tableId] new [cells]; every chart drawn from it on this
+  /// page follows in the same undo step (grafik terhubung, REQ-21).
+  /// [rect] resizes the table too (a row or column added).
+  void updateTable(String tableId, List<List<String>> cells, {Rect? rect}) {
+    final changes = <(PageItem, PageItem)>[];
+    for (var i = 0; i < _items.length; i++) {
+      final item = _items[i];
+      final PageItem? after = switch (item) {
+        TableItem() when item.id == tableId =>
+          item.withCells(cells).withRect(rect ?? item.rect),
+        ChartItem() when item.tableId == tableId => item.withCells(cells),
+        _ => null,
+      };
+      if (after == null) continue;
+      _items[i] = after;
+      changes.add((item, after));
+      listener?.itemChanged(after);
+    }
+    if (changes.isEmpty) return;
+    _record(ReplaceMany(changes));
+    committedRevision.value++;
+    activeRevision.value++;
+  }
+
+  /// Whether table [id] is still on this page (a chart is linked to it).
+  bool hasTable(String id) => _items.any((i) => i is TableItem && i.id == id);
 
   /// Topmost solid under [at] and the button there, if any (REQ-23).
   ({SolidItem solid, SolidButton? button})? hitSolid(Offset at) {
@@ -704,6 +755,10 @@ class InkController {
         listener?.itemsAdded([for (final r in removed) r.item]);
       case ReplaceItem(:final before, :final after):
         _swap(after, before);
+      case ReplaceMany(:final changes):
+        for (final (before, after) in changes) {
+          _swap(after, before);
+        }
       case SwapItems(:final removed, :final added):
         for (final item in added) {
           _items.remove(item);
@@ -734,6 +789,10 @@ class InkController {
         listener?.itemsRemoved([for (final r in removed) r.item]);
       case ReplaceItem(:final before, :final after):
         _swap(before, after);
+      case ReplaceMany(:final changes):
+        for (final (before, after) in changes) {
+          _swap(before, after);
+        }
       case SwapItems(:final removed, :final added):
         for (final r in removed) {
           _items.remove(r.item);

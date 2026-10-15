@@ -37,6 +37,7 @@ class InkCanvas extends StatefulWidget {
     this.target,
     this.media,
     this.color = AppColors.canvas,
+    this.onTableCell,
   });
 
   final InkController controller;
@@ -60,6 +61,10 @@ class InkCanvas extends StatefulWidget {
 
   /// Board color (tema papan, REQ-29).
   final Color color;
+
+  /// A table cell was tapped with a tool other than Pilih or Geser
+  /// (REQ-21): the board opens the table editor at that cell.
+  final void Function(TableItem table, int row, int col)? onTableCell;
 
   /// Eraser radius on screen, in logical pixels.
   static const eraserScreenRadius = 24.0;
@@ -112,6 +117,10 @@ class _InkCanvasState extends State<InkCanvas> with TickerProviderStateMixin {
   /// Peraga sliders being dragged and peraga/quiz controls pressed, per
   /// pointer (REQ-26–28).
   final Map<int, ({String id, Object control})> _liveTouches = {};
+
+  /// Fingers on a table cell, with where they went down (REQ-21).
+  final Map<int, ({String id, int row, int col, Offset start})> _tableTouches =
+      {};
 
   /// Drives playing peraga; runs only while one plays.
   late final Ticker _clock = createTicker(_tick);
@@ -214,6 +223,21 @@ class _InkCanvasState extends State<InkCanvas> with TickerProviderStateMixin {
         return;
       }
       if (tool != CanvasTool.select && ink.onLiveBody(at)) return;
+    }
+    // A table cell opens the table editor on a tap with any tool but Pilih
+    // (which moves the table) and Geser; the table takes no ink.
+    if (tool != CanvasTool.pan && tool != CanvasTool.select) {
+      final hit = ink.hitTableCell(at);
+      if (hit != null) {
+        _targets[e.pointer] = target;
+        _tableTouches[e.pointer] = (
+          id: hit.table.id,
+          row: hit.row,
+          col: hit.col,
+          start: e.localPosition,
+        );
+        return;
+      }
     }
     // A solid turns under a finger, and its buttons work, with any tool but
     // Geser; Pilih still moves and resizes it (its buttons work there too).
@@ -505,6 +529,18 @@ class _InkCanvasState extends State<InkCanvas> with TickerProviderStateMixin {
             hit.control.runtimeType == live.control.runtimeType) {
           _pressLive(ink, hit.item, hit.control);
         }
+      }
+      return;
+    }
+    final cell = _tableTouches.remove(e.pointer);
+    if (cell != null) {
+      if (cancelled || (e.localPosition - cell.start).distance > 24) return;
+      final hit = ink.hitTableCell(target.view.toCanvas(e.localPosition));
+      if (hit != null &&
+          hit.table.id == cell.id &&
+          hit.row == cell.row &&
+          hit.col == cell.col) {
+        widget.onTableCell?.call(hit.table, hit.row, hit.col);
       }
       return;
     }

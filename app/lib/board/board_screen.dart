@@ -28,6 +28,8 @@ import '../peraga/quiz_editor.dart';
 import '../lesson/lesson_session.dart';
 import '../lesson/lesson_widgets.dart';
 import '../solid/solid_geometry.dart';
+import '../table/table_data.dart';
+import '../table/table_editor.dart';
 
 /// SCR-01 Papan. Opens with the pen active so writing needs no taps (TSK-01).
 ///
@@ -81,6 +83,15 @@ class BoardScreen extends StatefulWidget {
       '$name ditempel. Atur nilainya, lalu tekan Putar.';
   static const quizPlaced =
       'Kuis ditempel. Siswa mengetuk kartu kiri lalu pasangannya di kanan.';
+  static const tablePlaced = 'Tabel ditempel. Ketuk sel untuk mengisinya.';
+  static const chartPlaced =
+      'Grafik ditempel di samping tabel. Ubah angka di tabel, grafik ikut berubah.';
+  static const tableNoNumbers =
+      'Tabel belum berisi angka. Isi kolom kedua dan seterusnya dengan angka, '
+      'lalu coba lagi.';
+  static const tableLimit = 'Tabel paling banyak 20 baris dan 6 kolom.';
+  static const chartNeedsNumbers =
+      'Garis dan Titik butuh angka di kolom pertama.';
   static String solidFromSketch(String name) =>
       'Sketsa menjadi $name. Tekan Undo untuk kembali ke sketsa.';
   static String solidPlaced(String name) =>
@@ -605,6 +616,127 @@ class _BoardScreenState extends State<BoardScreen> {
 
   /// Kuis (REQ-27): the teacher writes the pairs (or lets the AI suggest
   /// them from the page), then students match them at the board.
+  /// Tabel (REQ-21): an empty table in the middle of the visible page, big
+  /// enough that its text reads at least 20 sp on screen.
+  Future<void> _newTable() async {
+    setState(() => _menu = null);
+    final size = await showDialog<(int, int)>(
+      context: context,
+      builder: (_) => const TableSizeDialog(),
+    );
+    if (size == null || !mounted) return;
+    final (rows, cols) = size;
+    final scale = doc.page.view.scale;
+    final rect = Rect.fromCenter(
+      center: _visibleArea().center,
+      width: cols * 200 / scale,
+      height: rows * 64 / scale,
+    );
+    final ink = doc.page.ink;
+    ink.addItem(
+      TableItem(
+        id: ink.newId(),
+        rect: rect,
+        cells: TableItem.blank(rows, cols),
+      ),
+    );
+    setState(() {
+      // Tapping a cell fills it with any tool but Pilih and Geser.
+      if (_tool.value == CanvasTool.select || _tool.value == CanvasTool.pan) {
+        _setTool(CanvasTool.pen);
+      }
+    });
+    Notices.success(context, BoardScreen.tablePlaced);
+  }
+
+  Future<void> _editTable(TableItem table, int row, int col) async {
+    final cells = await showDialog<List<List<String>>>(
+      context: context,
+      builder: (_) => TableEditor(cells: table.cells, row: row, col: col),
+    );
+    if (cells == null || !mounted) return;
+    doc.page.ink.updateTable(table.id, cells);
+  }
+
+  void _growTable(TableItem table, {required bool row}) {
+    final r = table.rect;
+    final full = row
+        ? table.rows >= TableItem.maxRows
+        : table.cols >= TableItem.maxCols;
+    if (full) {
+      Notices.failure(context, BoardScreen.tableLimit);
+      return;
+    }
+    doc.page.ink.updateTable(
+      table.id,
+      row
+          ? [...table.cells, List.filled(table.cols, '')]
+          : [
+              for (final cells in table.cells) [...cells, ''],
+            ],
+      rect: row
+          ? Rect.fromLTWH(
+              r.left,
+              r.top,
+              r.width,
+              r.height + r.height / table.rows,
+            )
+          : Rect.fromLTWH(
+              r.left,
+              r.top,
+              r.width + r.width / table.cols,
+              r.height,
+            ),
+    );
+  }
+
+  /// Jadikan grafik from a table: drawn on the panel, no server (AC-185).
+  void _chartFromTable(TableItem table, ChartKind kind) {
+    final data = TableData(table.cells);
+    if (!data.hasNumbers) {
+      Notices.failure(context, BoardScreen.tableNoNumbers);
+      return;
+    }
+    if (!data.allowedKinds.contains(kind)) {
+      Notices.failure(context, BoardScreen.chartNeedsNumbers);
+      return;
+    }
+    final rect = _besideTable(table.rect);
+    final ink = doc.page.ink;
+    final chart = ChartItem(
+      id: ink.newId(),
+      rect: rect,
+      kind: kind,
+      tableId: table.id,
+      cells: table.cells,
+    );
+    ink.addItem(chart);
+    ink.select(chart.id);
+    Notices.success(context, BoardScreen.chartPlaced);
+  }
+
+  /// A chart frame next to the table, on the side with more room, sized to
+  /// fit the visible page (never on top of the table).
+  Rect _besideTable(Rect table) {
+    final visible = _visibleArea();
+    final gap = 24 / doc.page.view.scale;
+    final rightRoom = visible.right - table.right - gap * 2;
+    final leftRoom = table.left - visible.left - gap * 2;
+    final room = math.max(rightRoom, leftRoom);
+    final minW = 480 / doc.page.view.scale;
+    var w = math.min(visible.height * 0.75, math.max(room, minW));
+    var h = w / 1.5;
+    if (h > visible.height - gap * 2) {
+      h = visible.height - gap * 2;
+      w = h * 1.5;
+    }
+    final top = table.top.clamp(visible.top + gap, visible.bottom - gap - h);
+    final left = rightRoom >= leftRoom || room < minW
+        ? table.right + gap
+        : table.left - gap - w;
+    return Rect.fromLTWH(left, top.toDouble(), w, h);
+  }
+
   Future<void> _newQuiz() async {
     setState(() => _menu = null);
     final runner = widget.ai;
@@ -709,6 +841,7 @@ class _BoardScreenState extends State<BoardScreen> {
                               shape: _shape,
                               media: doc.images,
                               color: _theme.color,
+                              onTableCell: _editTable,
                               target: () =>
                                   (ink: doc.page.ink, view: doc.page.view),
                             ),
@@ -733,7 +866,13 @@ class _BoardScreenState extends State<BoardScreen> {
                         ),
                       ),
                       Positioned.fill(
-                        child: _SelectionActions(page: page, tool: _tool),
+                        child: _SelectionActions(
+                          page: page,
+                          tool: _tool,
+                          onAddRow: (t) => _growTable(t, row: true),
+                          onAddColumn: (t) => _growTable(t, row: false),
+                          onChart: _chartFromTable,
+                        ),
                       ),
                       if (widget.formulas != null)
                         Positioned.fill(
@@ -833,6 +972,7 @@ class _BoardScreenState extends State<BoardScreen> {
               onMenu: (m) => setState(() => _menu = m),
               onMove: _moveToolbar,
               onImage: _insertImage,
+              onTable: _newTable,
             ),
           ],
         ),
@@ -1063,10 +1203,20 @@ class _EmptyHint extends StatelessWidget {
 
 /// "Hapus" next to the item selected with Pilih (REQ-07, REQ-08).
 class _SelectionActions extends StatelessWidget {
-  const _SelectionActions({required this.page, required this.tool});
+  const _SelectionActions({
+    required this.page,
+    required this.tool,
+    required this.onAddRow,
+    required this.onAddColumn,
+    required this.onChart,
+  });
 
   final PageState page;
   final ValueListenable<CanvasTool> tool;
+
+  /// Table buttons (REQ-21).
+  final ValueChanged<TableItem> onAddRow, onAddColumn;
+  final void Function(TableItem table, ChartKind kind) onChart;
 
   @override
   Widget build(BuildContext context) {
@@ -1086,23 +1236,120 @@ class _SelectionActions extends StatelessWidget {
           return const SizedBox.shrink();
         }
         final frame = selectionFrame(ink, page.view, item);
+        final delete = FilledButton.icon(
+          style: FilledButton.styleFrom(backgroundColor: AppColors.danger),
+          onPressed: ink.deleteSelected,
+          icon: const Icon(Icons.delete_outline),
+          label: const Text('Hapus'),
+        );
         return Stack(
           children: [
-            Positioned(
-              left: frame.right + AppSizes.space16,
-              top: frame.top,
-              child: FilledButton.icon(
-                style: FilledButton.styleFrom(
-                  backgroundColor: AppColors.danger,
+            if (item is TableItem)
+              // Under the table (above it when it sits low), so the buttons
+              // never cover a chart placed beside it.
+              Positioned(
+                left: frame.left,
+                top:
+                    frame.bottom + 120 < MediaQuery.sizeOf(context).height - 200
+                    ? frame.bottom + AppSizes.space24
+                    : null,
+                bottom:
+                    frame.bottom + 120 < MediaQuery.sizeOf(context).height - 200
+                    ? null
+                    : MediaQuery.sizeOf(context).height -
+                          frame.top +
+                          AppSizes.space24,
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxWidth: math.max(frame.width, 360),
+                  ),
+                  child: Wrap(
+                    spacing: AppSizes.space8,
+                    runSpacing: AppSizes.space8,
+                    children: [
+                      _TableChartButton(
+                        table: item,
+                        onChart: (kind) => onChart(item, kind),
+                      ),
+                      OutlinedButton.icon(
+                        onPressed: () => onAddRow(item),
+                        icon: const Icon(Icons.table_rows_outlined),
+                        label: const Text('Tambah baris'),
+                      ),
+                      OutlinedButton.icon(
+                        onPressed: () => onAddColumn(item),
+                        icon: const Icon(Icons.view_column_outlined),
+                        label: const Text('Tambah kolom'),
+                      ),
+                      delete,
+                    ],
+                  ),
                 ),
-                onPressed: ink.deleteSelected,
-                icon: const Icon(Icons.delete_outline),
-                label: const Text('Hapus'),
+              )
+            else
+              Positioned(
+                left: frame.right + AppSizes.space16,
+                top: frame.top,
+                child: delete,
               ),
-            ),
           ],
         );
       },
+    );
+  }
+}
+
+/// "Jadikan grafik" on a selected table, then Garis / Batang / Titik
+/// (REQ-21). Garis and Titik are off while column 0 holds text.
+class _TableChartButton extends StatelessWidget {
+  const _TableChartButton({required this.table, required this.onChart});
+
+  final TableItem table;
+  final ValueChanged<ChartKind> onChart;
+
+  @override
+  Widget build(BuildContext context) {
+    final data = TableData(table.cells);
+    final allowed = data.allowedKinds;
+    return MenuAnchor(
+      menuChildren: [
+        for (final kind in ChartKind.values)
+          MenuItemButton(
+            onPressed: allowed.contains(kind) ? () => onChart(kind) : null,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: AppSizes.target),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                widthFactor: 1,
+                child: Text(
+                  kind.label,
+                  style: const TextStyle(fontSize: AppSizes.textBody),
+                ),
+              ),
+            ),
+          ),
+        if (!allowed.contains(ChartKind.garis))
+          Padding(
+            padding: const EdgeInsets.all(AppSizes.space12),
+            child: Text(
+              BoardScreen.chartNeedsNumbers,
+              style: Theme.of(context).textTheme.bodyLarge,
+            ),
+          ),
+      ],
+      builder: (context, menu, _) => FilledButton.icon(
+        onPressed: () {
+          if (!data.hasNumbers) {
+            Notices.failure(context, BoardScreen.tableNoNumbers);
+          } else if (menu.isOpen) {
+            menu.close();
+          } else {
+            menu.open();
+          }
+        },
+        icon: const Icon(Icons.insert_chart_outlined),
+        label: const Text('Jadikan grafik'),
+      ),
     );
   }
 }

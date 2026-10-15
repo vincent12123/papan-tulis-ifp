@@ -6,6 +6,8 @@ import 'package:flutter/rendering.dart';
 import '../peraga/peraga_painter.dart';
 import '../peraga/quiz_painter.dart';
 import '../solid/solid_painter.dart';
+import '../table/chart_painter.dart';
+import '../table/table_painter.dart';
 import '../ui/theme.dart';
 import 'media_images.dart';
 import '../graph/graph_painter.dart';
@@ -56,6 +58,10 @@ void paintItem(
       paintPeraga(canvas, item);
     case QuizItem():
       paintQuiz(canvas, item, null);
+    case TableItem():
+      paintTable(canvas, item);
+    case ChartItem():
+      paintChart(canvas, item);
     case TextItem():
       final painter = TextPainter(
         text: TextSpan(

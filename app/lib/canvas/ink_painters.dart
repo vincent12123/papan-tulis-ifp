@@ -300,7 +300,10 @@ class InkPictureCache {
       final end = (start + chunkSize).clamp(0, items.length);
       _chunks.add(_record(items.sublist(start, end), media));
     }
-    _included = items;
+    // A copy: [items] is often the controller's own list, which changes in
+    // place; keeping the same list would make every later change look
+    // already drawn.
+    _included = List.of(items);
   }
 
   int _sharedPrefixLength(List<PageItem> items) {

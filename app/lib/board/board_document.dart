@@ -145,6 +145,8 @@ PageItem _copyItem(PageItem item, String id) => switch (item) {
   SolidItem() => item.copyAs(id),
   PeragaItem() => item.copyAs(id),
   QuizItem() => item.copyAs(id),
+  TableItem() => item.copyAs(id),
+  ChartItem() => item.copyAs(id),
 };
 
 /// The board that is open on the panel, kept in memory and saved as it
@@ -277,8 +279,13 @@ class BoardDocument {
   /// Copies page [index] right after itself (AC-23) and opens the copy.
   int duplicatePage(int index) {
     final source = pages[index];
+    final ids = {for (final item in source.ink.items) item.id: repo.newId()};
     final copies = [
-      for (final item in source.ink.items) _copyItem(item, repo.newId()),
+      for (final item in source.ink.items)
+        // A copied chart follows the copied table, not the original.
+        item is ChartItem
+            ? item.copyAs(ids[item.id]!, tableId: ids[item.tableId])
+            : _copyItem(item, ids[item.id]!),
     ];
     final pageId = repo.newId();
     final view = CanvasView(
