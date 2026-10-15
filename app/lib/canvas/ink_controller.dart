@@ -7,6 +7,8 @@ import '../ui/theme.dart';
 import '../graph/graph_painter.dart';
 import 'eraser.dart';
 import 'media_images.dart';
+import '../mandarin/mandarin_painter.dart';
+import '../mandarin/mandarin_voice.dart';
 import '../peraga/peraga_painter.dart';
 import '../peraga/quiz_painter.dart';
 import '../solid/solid_painter.dart';
@@ -477,6 +479,7 @@ class InkController {
       QuizItem() => original.withRect(to),
       TableItem() => original.withRect(to),
       ChartItem() => original.withRect(to),
+      MandarinItem() => original.withRect(to),
       Stroke() => original,
     };
     activeRevision.value++;
@@ -566,8 +569,11 @@ class InkController {
 
   /// Items drawn on the live layer instead of the cached ink: quizzes, and
   /// peraga that play or are paused mid-way.
+  /// Mandarin cards are live too: their speak buttons depend on whether the
+  /// panel has a Mandarin voice, which is known only after start-up.
   bool isLive(PageItem item) =>
       item is QuizItem ||
+      item is MandarinItem ||
       (item is PeragaItem &&
           (running.contains(item.id) || (liveTime[item.id] ?? 0) > 0));
 
@@ -598,9 +604,15 @@ class InkController {
       final Object? control = switch (item) {
         PeragaItem() => PeragaLayout(item).controlAt(at),
         QuizItem() => QuizLayout(item).targetAt(at),
+        MandarinItem() => MandarinLayout(
+          item,
+          voice: MandarinVoiceStatus.available.value,
+        ).targetAt(at),
         _ => null,
       };
-      if (item is! PeragaItem && item is! QuizItem) return null;
+      if (item is! PeragaItem && item is! QuizItem && item is! MandarinItem) {
+        return null;
+      }
       return control == null ? null : (item: item, control: control);
     }
     return null;
@@ -611,7 +623,7 @@ class InkController {
     for (var i = _items.length - 1; i >= 0; i--) {
       final item = _items[i];
       if (!item.bounds.contains(at)) continue;
-      return item is PeragaItem || item is QuizItem;
+      return item is PeragaItem || item is QuizItem || item is MandarinItem;
     }
     return false;
   }

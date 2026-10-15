@@ -9,7 +9,9 @@ from fastapi.testclient import TestClient
 
 from app.config import Model, Provider, ProviderConfig, Settings
 from app.db import Database
+from app.hanzi_reader import HanziReading, accept
 from app.main import create_app
+from app.mandarin_dict import Dictionary
 from app.security import PIN_KEY, hash_pin
 
 PIN = "482915"
@@ -95,6 +97,32 @@ class FakeReader:
         return self.lines
 
 
+class FakeHanzi:
+    """Stands in for the PP-OCRv4 model: no Chinese unless told."""
+
+    def __init__(self):
+        self.raw = ""
+        self.confidence = 0.95
+
+    def read(self, png: bytes) -> HanziReading:
+        return HanziReading(accept(self.raw, self.confidence), self.confidence, self.raw)
+
+
+# A few CC-CEDICT lines, same format as the real file.
+MINI_CEDICT = """# CC-CEDICT mini
+你好 你好 [ni3 hao3] /hello/hi/
+好好 好好 [hao3 hao3] /well/carefully/
+學習 学习 [xue2 xi2] /to learn/to study/
+天天 天天 [tian1 tian1] /every day/
+向上 向上 [xiang4 shang4] /upward/up/
+我 我 [wo3] /I/me/my/
+是 是 [shi4] /is/are/
+學生 学生 [xue2 sheng5] /student/schoolchild/
+明 明 [Ming2] /Ming Dynasty/
+明 明 [ming2] /bright/opposite: dark 暗[an4]/
+"""
+
+
 class FakeTranscriber:
     """Stands in for Whisper: returns fixed text, records the files."""
 
@@ -129,6 +157,18 @@ def fake_reader() -> FakeReader:
 
 
 @pytest.fixture
+def fake_hanzi() -> FakeHanzi:
+    return FakeHanzi()
+
+
+@pytest.fixture
+def dictionary(tmp_path: Path) -> Dictionary:
+    cedict = tmp_path / "cedict.txt"
+    cedict.write_text(MINI_CEDICT, encoding="utf-8")
+    return Dictionary(cedict, tmp_path / "data" / "kamus-arti.json")
+
+
+@pytest.fixture
 def fake_transcriber() -> FakeTranscriber:
     return FakeTranscriber()
 
@@ -148,13 +188,15 @@ def settings(tmp_path: Path) -> Settings:
 
 
 @pytest.fixture
-def client(settings, fake_ai, fake_reader, fake_transcriber, clock):
+def client(settings, fake_ai, fake_reader, fake_hanzi, dictionary, fake_transcriber, clock):
     http = httpx.AsyncClient(transport=httpx.MockTransport(fake_ai.handler))
     app = create_app(
         settings,
         providers=default_providers(),
         http_client=http,
         formula_reader=fake_reader,
+        hanzi_reader=fake_hanzi,
+        dictionary=dictionary,
         transcriber=fake_transcriber,
         clock=clock,
     )

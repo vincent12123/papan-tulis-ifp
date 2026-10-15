@@ -8,6 +8,7 @@ server/.env
 # Python
 server/.venv/
 server/models/
+server/kamus/
 __pycache__/
 *.pyc
 .pytest_cache/

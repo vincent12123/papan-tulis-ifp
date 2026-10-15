@@ -511,3 +511,50 @@ class ChartItem extends PageItem {
     z: z,
   );
 }
+
+/// One word on a Mandarin card (REQ-30). [source] is `kamus` (Indonesian),
+/// `inggris` (English meaning, no Indonesian yet), or `tidak_ada`.
+typedef MandarinEntry = ({
+  String hanzi,
+  String pinyin,
+  String meaning,
+  String source,
+});
+
+/// Pinyin & arti card beside handwritten Hanzi (jenis = mandarin, REQ-30).
+class MandarinItem extends PageItem {
+  MandarinItem({
+    required super.id,
+    required this.rect,
+    required this.hanzi,
+    required this.pinyin,
+    required this.words,
+    this.translation,
+    super.z,
+  });
+
+  static const maxWords = 24;
+
+  final Rect rect;
+  final String hanzi;
+  final String pinyin;
+  final List<MandarinEntry> words;
+
+  /// Sentence translation by the AI; null when it was not available.
+  final String? translation;
+
+  @override
+  Rect get bounds => rect;
+
+  MandarinItem withRect(Rect r) => copyAs(id, rect: r);
+
+  MandarinItem copyAs(String newId, {Rect? rect}) => MandarinItem(
+    id: newId,
+    rect: rect ?? this.rect,
+    hanzi: hanzi,
+    pinyin: pinyin,
+    words: words,
+    translation: translation,
+    z: z,
+  );
+}

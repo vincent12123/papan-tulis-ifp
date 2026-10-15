@@ -130,6 +130,8 @@ class Settings:
     hanzi_model: Path = field(
         default_factory=lambda: Path("models/ppocr-v4-rec/ch_PP-OCRv4_rec_infer.onnx")
     )
+    # CC-CEDICT (gzip or text) for Pinyin & arti (REQ-30).
+    cedict_file: Path = field(default_factory=lambda: Path("kamus/cedict.txt.gz"))
     # Whisper speech-to-text for Rekam kelas (REQ-25).
     whisper_dir: Path = field(default_factory=lambda: Path("models/whisper"))
     whisper_model: str = "small"
@@ -147,6 +149,7 @@ class Settings:
                     "PAPAN_MODEL_HANZI", "models/ppocr-v4-rec/ch_PP-OCRv4_rec_infer.onnx"
                 )
             ),
+            cedict_file=Path(os.environ.get("PAPAN_KAMUS", "kamus/cedict.txt.gz")),
             whisper_dir=Path(os.environ.get("PAPAN_MODEL_SUARA", "models/whisper")),
             whisper_model=os.environ.get("PAPAN_WHISPER", "small"),
         )

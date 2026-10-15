@@ -9,6 +9,7 @@ import 'board/board_title.dart';
 import 'board/media_import.dart';
 import 'board/smart_menu.dart';
 import 'lesson/lesson_session.dart';
+import 'mandarin/mandarin_voice.dart';
 import 'board/video_dialog.dart';
 import 'boards/board_list_screen.dart';
 import 'data/board_repository.dart';
@@ -34,6 +35,7 @@ class AppShell extends StatefulWidget {
     this.clientFor,
     this.recorder,
     this.lessonPath,
+    this.voice,
   });
 
   final Future<BoardRepository> repository;
@@ -54,6 +56,9 @@ class AppShell extends StatefulWidget {
 
   /// Where the recording is written; null uses the temporary folder.
   final Future<String> Function()? lessonPath;
+
+  /// Mandarin voice (REQ-30); null uses the panel's text-to-speech.
+  final MandarinVoice Function()? voice;
 
   /// Loading text appears only when opening takes longer than this.
   static const loadingDelay = Duration(seconds: 1);
@@ -93,7 +98,13 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _start();
+    _voice.init().then((ok) {
+      if (mounted) MandarinVoiceStatus.available.value = ok;
+    });
   }
+
+  /// The panel's Mandarin voice, checked once at start-up (REQ-30).
+  late final MandarinVoice _voice = (widget.voice ?? TtsMandarinVoice.new)();
 
   /// Rekam kelas lives as long as the app, so switching boards keeps it.
   LessonSession? _lessonSession;
@@ -296,6 +307,29 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
     };
   }
 
+  /// Pinyin & arti (REQ-30) on the school server, with the PIN and AI
+  /// choice from Pengaturan.
+  MandarinLookup? get _mandarin {
+    final settingsFor = widget.settingsFor;
+    if (settingsFor == null) return null;
+    return (text) async {
+      final saved = await settingsFor(_repo!).load();
+      if (!saved.isConfigured) throw const PinRejected();
+      final client =
+          widget.clientFor?.call(saved.serverUrl!, saved.pin!) ??
+          ServerClient(baseUrl: saved.serverUrl!, pin: saved.pin!);
+      try {
+        return await client.mandarin(
+          text,
+          providerId: saved.providerId,
+          model: saved.model,
+        );
+      } finally {
+        client.close();
+      }
+    };
+  }
+
   /// Catalog videos stream from the school server with the saved PIN.
   VideoSource? get _videos {
     final settingsFor = widget.settingsFor;
@@ -343,6 +377,8 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
         formulas: _formulas,
         videos: _videos,
         lesson: _lesson,
+        mandarin: _mandarin,
+        voice: _voice,
       ),
       _Loading(:final title) => _LoadingView(
         text: _showLoading

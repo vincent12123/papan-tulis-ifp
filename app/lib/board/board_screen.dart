@@ -28,6 +28,8 @@ import '../peraga/quiz_editor.dart';
 import '../lesson/lesson_session.dart';
 import '../lesson/lesson_widgets.dart';
 import '../solid/solid_geometry.dart';
+import '../mandarin/mandarin_painter.dart';
+import '../mandarin/mandarin_voice.dart';
 import '../table/table_data.dart';
 import '../table/table_editor.dart';
 
@@ -45,6 +47,8 @@ class BoardScreen extends StatefulWidget {
     this.formulas,
     this.videos,
     this.lesson,
+    this.mandarin,
+    this.voice,
     this.diagnostics = kDiagnostics,
     this.collectReport,
   });
@@ -68,6 +72,12 @@ class BoardScreen extends StatefulWidget {
   /// Rekam kelas (REQ-25); null hides the Rekam button.
   final LessonSession? lesson;
 
+  /// Pinyin & arti on the school server (REQ-30); null hides the button.
+  final MandarinLookup? mandarin;
+
+  /// The panel's Mandarin voice (REQ-30); null = no voice.
+  final MandarinVoice? voice;
+
   static const pastedText =
       'Hasil AI ditempel di papan. Geser atau ubah sesuai kebutuhan.';
 
@@ -84,6 +94,13 @@ class BoardScreen extends StatefulWidget {
   static const quizPlaced =
       'Kuis ditempel. Siswa mengetuk kartu kiri lalu pasangannya di kanan.';
   static const tablePlaced = 'Tabel ditempel. Ketuk sel untuk mengisinya.';
+  static const mandarinPlaced =
+      'Kartu pinyin & arti ditempel di samping tulisan.';
+  static const mandarinUnavailable =
+      'Kamus Mandarin sedang tidak tersedia. Coba lagi beberapa menit lagi.';
+  static const noHanzi =
+      'Tidak ada aksara Mandarin yang dikenali. Tulis lebih jelas, lalu '
+      'lingkari lagi.';
   static const chartPlaced =
       'Grafik ditempel di samping tabel. Ubah angka di tabel, grafik ikut berubah.';
   static const tableNoNumbers =
@@ -715,6 +732,58 @@ class _BoardScreenState extends State<BoardScreen> {
     Notices.success(context, BoardScreen.chartPlaced);
   }
 
+  /// Pinyin & arti (REQ-30): asks the school server for the circled Hanzi
+  /// and pastes a card beside the writing. The board is left as it was on
+  /// any failure.
+  Future<void> _mandarinCard(Rect area, FormulaInsight insight) async {
+    final lookup = widget.mandarin;
+    final text = insight.hanzi;
+    if (lookup == null || text == null) return;
+    final MandarinReading reading;
+    try {
+      reading = await lookup(text);
+    } on ServerFailure catch (f) {
+      if (!mounted) return;
+      Notices.failure(context, switch (f) {
+        ServerUnreachable() => SmartAreaBar.offline,
+        PinRejected() || PinNotSetOnServer() => SmartAreaBar.notAllowed,
+        PinLocked() => SmartAreaBar.locked,
+        ServerValidation() || NoFormulaFound() => BoardScreen.noHanzi,
+        _ => BoardScreen.mandarinUnavailable,
+      });
+      return;
+    }
+    if (!mounted) return;
+    final ink = doc.page.ink;
+    final card = MandarinItem(
+      id: ink.newId(),
+      rect: Rect.zero,
+      hanzi: reading.hanzi,
+      pinyin: reading.pinyin,
+      translation: reading.translation,
+      words: [
+        for (final w in reading.words.take(MandarinItem.maxWords))
+          (
+            hanzi: w.hanzi,
+            pinyin: w.pinyin,
+            meaning: w.meaning,
+            source: w.source,
+          ),
+      ],
+    );
+    final visible = _visibleArea();
+    final width = math.min(visible.width * 0.42, 760 / doc.page.view.scale);
+    final rect = placeResult(
+      Size(width, MandarinLayout.heightFor(card, width)),
+      visible,
+      area,
+    );
+    final placed = card.withRect(rect);
+    ink.addItem(placed);
+    ink.clearArea();
+    Notices.success(context, BoardScreen.mandarinPlaced);
+  }
+
   /// A chart frame next to the table, on the side with more room, sized to
   /// fit the visible page (never on top of the table).
   Rect _besideTable(Rect table) {
@@ -842,6 +911,8 @@ class _BoardScreenState extends State<BoardScreen> {
                               media: doc.images,
                               color: _theme.color,
                               onTableCell: _editTable,
+                              onSpeak: (text, slow) =>
+                                  widget.voice?.speak(text, slow: slow),
                               target: () =>
                                   (ink: doc.page.ink, view: doc.page.view),
                             ),
@@ -884,6 +955,9 @@ class _BoardScreenState extends State<BoardScreen> {
                               onGraph: _placeGraph,
                               onTidy: _tidy,
                               onSolve: (a, i) => _solve(a, i),
+                              onMandarin: widget.mandarin == null
+                                  ? null
+                                  : _mandarinCard,
                               onPeraga: _peragaBeside,
                               onSketch: _sketchToSolid,
                               onVideo: widget.videos == null

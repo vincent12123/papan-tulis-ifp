@@ -12,6 +12,8 @@ import 'package:whiteboard_ifp/canvas/stroke.dart';
 import 'package:whiteboard_ifp/peraga/peraga_specs.dart';
 import 'package:whiteboard_ifp/server/settings_store.dart';
 import 'package:whiteboard_ifp/solid/solid_geometry.dart';
+import 'package:whiteboard_ifp/mandarin/mandarin_painter.dart';
+import 'package:whiteboard_ifp/mandarin/mandarin_voice.dart';
 import 'package:whiteboard_ifp/table/table_painter.dart';
 
 import 'package:flutter/widgets.dart' show ValueKey;
@@ -41,6 +43,13 @@ Future<void> _loadFonts() async {
     ..addFont(read('roboto-medium.ttf'))
     ..addFont(read('roboto-bold.ttf'));
   await fallback.load();
+  // Android draws Hanzi with its system CJK font; here Microsoft YaHei.
+  final cjk = File('C:/Windows/Fonts/msyh.ttc');
+  if (cjk.existsSync()) {
+    final loader = FontLoader('Noto Sans CJK SC')
+      ..addFont(Future.value(ByteData.sublistView(cjk.readAsBytesSync())));
+    await loader.load();
+  }
   final icons = FontLoader('MaterialIcons')
     ..addFont(read('materialicons-regular.otf'));
   await icons.load();
@@ -65,6 +74,15 @@ Future<void> _settle(WidgetTester tester) async {
     );
     await tester.pump();
   }
+}
+
+/// A panel with a Mandarin voice.
+class _Voice implements MandarinVoice {
+  @override
+  Future<bool> init() async => true;
+
+  @override
+  Future<void> speak(String text, {bool slow = false}) async {}
 }
 
 void main() {
@@ -260,5 +278,55 @@ void main() {
     ink.select(filled.id);
     await _settle(tester);
     await _shot(tester, '12-tabel-grafik');
+  });
+
+  testWidgets('kartu mandarin', (tester) async {
+    await tester.runAsync(_loadFonts);
+    await pumpApp(tester, voice: _Voice.new);
+    await _settle(tester);
+    final ink = inkOf(tester);
+    for (final (from, by) in [
+      (const Offset(120, 180), const Offset(90, 10)),
+      (const Offset(240, 170), const Offset(70, 40)),
+      (const Offset(340, 180), const Offset(80, -10)),
+    ]) {
+      await drag(tester, from, by);
+    }
+    final card = MandarinItem(
+      id: ink.newId(),
+      rect: Rect.zero,
+      hanzi: '好好学习，天天向上',
+      pinyin: 'hǎo hǎo xué xí tiān tiān xiàng shàng',
+      translation: 'Belajarlah dengan sungguh-sungguh, maju setiap hari.',
+      words: const [
+        (
+          hanzi: '好好',
+          pinyin: 'hǎo hǎo',
+          meaning: 'dengan sungguh-sungguh',
+          source: 'kamus',
+        ),
+        (hanzi: '学习', pinyin: 'xué xí', meaning: 'belajar', source: 'kamus'),
+        (
+          hanzi: '天天',
+          pinyin: 'tiān tiān',
+          meaning: 'setiap hari',
+          source: 'kamus',
+        ),
+        (
+          hanzi: '向上',
+          pinyin: 'xiàng shàng',
+          meaning: 'upward; up',
+          source: 'inggris',
+        ),
+      ],
+    );
+    const width = 760.0;
+    ink.addItem(
+      card.withRect(
+        Rect.fromLTWH(520, 90, width, MandarinLayout.heightFor(card, width)),
+      ),
+    );
+    await _settle(tester);
+    await _shot(tester, '13-kartu-mandarin');
   });
 }

@@ -43,6 +43,13 @@ from .formula_insight import analyze
 from .formula_math import build_graph, split_rows
 from .formula_reader import MODEL_NAME, FormulaReader, OnnxFormulaReader, ReaderUnavailable
 from .formula_render import render
+from .hanzi_reader import HanziReader, OnnxHanziReader
+from .mandarin_dict import (
+    Dictionary,
+    build_mandarin_prompt,
+    clean_text,
+    parse_mandarin_answer,
+)
 from .security import PIN_KEY, hash_pin, pin_problem, verify_pin
 from .video_library import find_videos, load_catalog
 
@@ -61,6 +68,8 @@ def create_app(
     providers: ProviderConfig | None = None,
     http_client: httpx.AsyncClient | None = None,
     formula_reader: FormulaReader | None = None,
+    hanzi_reader: HanziReader | None = None,
+    dictionary: Dictionary | None = None,
     transcriber: Transcriber | None = None,
     clock=time.time,
 ) -> FastAPI:
@@ -72,6 +81,10 @@ def create_app(
         app.state.providers = providers or load_providers(settings.providers_file)
         app.state.http = http_client or httpx.AsyncClient()
         app.state.reader = formula_reader or OnnxFormulaReader(settings.formula_model_dir)
+        app.state.hanzi = hanzi_reader or OnnxHanziReader(settings.hanzi_model)
+        app.state.dictionary = dictionary or Dictionary(
+            settings.cedict_file, settings.data_dir / "kamus-arti.json"
+        )
         app.state.transcriber = transcriber or WhisperTranscriber(
             settings.whisper_dir, settings.whisper_model
         )
@@ -296,7 +309,27 @@ def create_app(
             image, w, h = render(lines or [empty], body.warna)
             return {"gambar": base64.b64encode(image).decode(), "lebar": w, "tinggi": h}
 
+        hanzi: HanziReader = request.app.state.hanzi
+
         def work() -> dict | None:
+            # Mandarin (REQ-30) first: it takes ~0.03 s, and a Chinese line
+            # would only be misread as a formula. A missing Hanzi model must
+            # not break the formula menu.
+            try:
+                chinese = hanzi.read(png).text
+            except ReaderUnavailable:
+                chinese = ""
+            if chinese:
+                return {
+                    "jenis": "mandarin",
+                    "hanzi": chinese,
+                    "rumus": [],
+                    "grafik": None,
+                    "rapi": None,
+                    "penyelesaian": None,
+                    "zat": [],
+                    "video": [],
+                }
             lines = reader.read(png)
             rows = [part for line in lines for part in split_rows(line)]
             chem = analyze_chem(rows)
@@ -360,6 +393,67 @@ def create_app(
             raise ApiError(422, "tanpa_rumus", "Tidak ada rumus yang dikenali di area ini.")
         result["durasi_ms"] = log("berhasil")
         return result
+
+    class MandarinRequest(BaseModel):
+        teks: str = Field(min_length=1, max_length=200)
+        penyedia: str | None = Field(default=None, max_length=40)
+        model: str | None = Field(default=None, max_length=120)
+
+    @app.post("/mandarin/arti")
+    async def mandarin(body: MandarinRequest, request: Request, address: Authed):
+        """Pinyin & arti (REQ-30): words and pinyin from the dictionary;
+        the AI only translates the sentence and missing word meanings. When
+        the AI fails the card still comes with pinyin and dictionary meanings
+        (AC-192). Nothing of the text is logged (NFR-21)."""
+        text = clean_text(body.teks)
+        if not any(c.strip() for c in text):
+            raise ApiError(422, "tanpa_hanzi", "Tidak ada aksara Mandarin di teks ini.")
+        limit_ai(address)
+        db: Database = request.app.state.db
+        words: Dictionary = request.app.state.dictionary
+        try:
+            reading = await run_in_threadpool(words.read, text)
+        except OSError as e:
+            raise ApiError(
+                503, "kamus_tidak_tersedia", "Kamus Mandarin belum dipasang di server."
+            ) from e
+        translation = None
+        provider = model_name = None
+        start = time.monotonic()
+        try:
+            result = await run_with_fallback(
+                request.app.state.http,
+                request.app.state.providers,
+                provider_id=body.penyedia,
+                model=body.model,
+                prompt=build_mandarin_prompt(reading),
+                primary_timeout=settings.primary_timeout,
+                total_timeout=settings.total_timeout,
+            )
+            translation, meanings = parse_mandarin_answer(result.text, reading)
+            await run_in_threadpool(words.remember, meanings)
+            for w in reading.words:
+                if w.hanzi in meanings:
+                    w.arti, w.source = meanings[w.hanzi], "kamus"
+            provider, model_name = result.provider.id, result.model
+            status = "berhasil" if translation else "gagal"
+            ms = result.duration_ms
+        except AiUnavailable as e:
+            status = "batas_waktu" if e.reason == "batas_waktu" else "gagal"
+            provider, model_name = e.provider, e.model
+            ms = int((time.monotonic() - start) * 1000)
+        db.log_ai(
+            kind="mandarin", status=status, duration_ms=ms, provider=provider, model=model_name
+        )
+        return {
+            "hanzi": reading.hanzi,
+            "pinyin": reading.pinyin,
+            "kata": [
+                {"hanzi": w.hanzi, "pinyin": w.pinyin, "arti": w.arti, "sumber": w.source}
+                for w in reading.words
+            ],
+            "terjemahan": translation,
+        }
 
     def decode_png(data: str) -> bytes:
         try:

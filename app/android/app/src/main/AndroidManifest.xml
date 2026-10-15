@@ -46,6 +46,10 @@
         <!-- Checkpoint 1 device report: is Google Play Services / Play Store present (SPEC P-01, P-04). -->
         <package android:name="com.google.android.gms"/>
         <package android:name="com.android.vending"/>
+        <!-- Suara Mandarin (REQ-30): flutter_tts must see the TTS engines on Android 11+. -->
+        <intent>
+            <action android:name="android.intent.action.TTS_SERVICE"/>
+        </intent>
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>

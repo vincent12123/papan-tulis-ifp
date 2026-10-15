@@ -13,3 +13,6 @@ matplotlib==3.11.2
 # Rekam kelas (SPEC 1.9): ucapan ke teks di server sendiri
 faster-whisper==1.2.1
 av==18.0.0
+# Mandarin (SPEC 1.13): pinyin dari kamus, pemenggalan kata (keduanya MIT)
+pypinyin==0.55.0
+jieba==0.42.1

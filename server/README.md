@@ -98,6 +98,24 @@ dalam satu folder, lalu:
 Tiap gambar dicetak dengan bacaan, keyakinan, dan `benar` / `DITOLAK` /
 `SALAH`; baris terakhir menghitung semuanya. Gambar tidak disimpan ke mana pun.
 
+## Pinyin & arti (REQ-30)
+
+`POST /mandarin/arti` (`{"teks": "学习"}`) memberi pinyin bernada (pypinyin),
+kata (jieba) dan arti per kata. Kamus **CC-CEDICT** (CC BY-SA 4.0, ±4 MB
+gzip) tidak ikut disalin; unduh sekali:
+
+```bash
+mkdir -p kamus
+curl -fsSL -o kamus/cedict.txt.gz \
+  https://www.mdbg.net/chinese/export/cedict/cedict_1_0_ts_utf-8_mdbg.txt.gz
+```
+
+Lokasi lain: `PAPAN_KAMUS`. Arti Bahasa Indonesia per kata disimpan di
+`data/kamus-arti.json` (kata → arti). Kata yang belum ada ditanyakan ke AI
+sekali bersama terjemahan kalimat lalu disimpan di sana; operator boleh
+memperbaiki isinya (berlaku setelah server dimulai ulang).
+Bila AI mati, panel tetap mendapat pinyin dan arti Inggris dari kamus.
+
 ## Video eksperimen (REQ-24)
 
 Taruh berkas MP4/WebM di folder `video/` (atau `PAPAN_VIDEO`) dan daftarkan di

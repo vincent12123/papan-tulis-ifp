@@ -147,6 +147,7 @@ PageItem _copyItem(PageItem item, String id) => switch (item) {
   QuizItem() => item.copyAs(id),
   TableItem() => item.copyAs(id),
   ChartItem() => item.copyAs(id),
+  MandarinItem() => item.copyAs(id),
 };
 
 /// The board that is open on the panel, kept in memory and saved as it

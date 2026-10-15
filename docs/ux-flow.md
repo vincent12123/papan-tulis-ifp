@@ -6,7 +6,7 @@
 > Layar yang belum berstatus **Disetujui** tidak boleh dikoding.
 > Panduan pengisian: `references/panduan-ui-ux.md` di skill SDD.
 
-- **Versi:** 1.8
+- **Versi:** 1.9
 - **Status:** Disetujui (SCR-06 v1.1: rincian usulan menunggu konfirmasi)
 - **Mengacu SPEC versi:** 1.4
 
@@ -429,6 +429,7 @@ Setelah berhasil:
 | Indikator simpan | Teks kecil "Menyimpan…" / "Tersimpan" di bilah atas; tidak menghalangi menulis |
 | Proses panjang | Indikator kemajuan dengan keterangan langkah dan tombol Batalkan; tidak mengunci kanvas kecuali dialog Bagikan dan AI |
 | Pilih area (lasso) | Alat Pilih: lingkari dengan jari/stylus di tempat kosong; area terpilih diberi garis putus-putus dan **bilah di bawah area** (di atas area bila tidak muat) berisi tombol utama "Jadikan grafik" (v1.3, seperti video referensi; "Ubah ke teks" menyusul REQ-10). Aksi AI lain lewat tombol "Asisten AI" di bilah atas. Mengetuk gambar/bentuk/grafik tetap memilih objek itu |
+| Pinyin & arti (v1.9, REQ-30, teks usulan AI) | Menu pintar pada tulisan Hanzi: hanya tombol "Pinyin & arti" (tanpa Rapikan rumus). Berhasil: kartu di samping tulisan berisi pinyin, Hanzi besar, terjemahan kalimat + "Terjemahan AI — periksa sebelum dipakai" (bila AI tidak menjawab: "Terjemahan kalimat belum tersedia (AI tidak menjawab). Arti per kata dari kamus."), kotak per kata (Hanzi, pinyin, arti; arti Inggris diberi "(Inggris)"), tombol "Dengarkan" dan "Pelan"; ketuk kotak kata = bunyi kata itu. Tanpa suara Mandarin di panel: tombol diganti "Suara Mandarin belum terpasang di panel. Pasang paket suara Mandarin di Pengaturan Android." Notifikasi "Kartu pinyin & arti ditempel di samping tulisan." Gagal (papan tidak berubah): pesan menu pintar yang ada; tanpa Hanzi "Tidak ada aksara Mandarin yang dikenali. Tulis lebih jelas, lalu lingkari lagi."; kamus "Kamus Mandarin sedang tidak tersedia. Coba lagi beberapa menit lagi." Kartu dipindah/diubah ukuran/dihapus dengan Pilih seperti gambar; badan kartu tidak menerima tinta |
 | Tabel (v1.8, REQ-21, teks usulan AI) | Bilah alat: tombol "Tabel" → dialog "Sisipkan tabel": "Baris" dan "Kolom" dengan tombol − / + (bawaan 5 × 3; batas 2–20 dan 2–6), "Batal" / "Sisipkan". Berhasil: "Tabel ditempel. Ketuk sel untuk mengisinya." Sel: ketuk (alat apa pun kecuali Pilih dan Geser) → dialog "Isi tabel" ("Baris pertama: judul kolom. Kolom pertama: nilai x atau nama. Kolom lain: angka (koma desimal boleh).", semua sel, keyboard di sel yang diketuk, tombol berikutnya pindah sel; "Batal" / "Simpan"); di papan baris pertama tebal (judul kolom), petunjuk samar di sel judul kosong "Judul". Tabel terpilih (Pilih): bingkai + pegangan seperti gambar, di bawah tabel tombol "Jadikan grafik", "Tambah baris", "Tambah kolom", dan "Hapus". Jadikan grafik pada tabel tanpa angka langsung menampilkan pesan tanpa membuka menu. Jadikan grafik → menu "Garis", "Batang", "Titik" (Garis/Titik nonaktif dengan keterangan "Garis dan Titik butuh angka di kolom pertama." bila kolom pertama berisi teks). Berhasil: "Grafik ditempel di samping tabel. Ubah angka di tabel, grafik ikut berubah." Gagal: tanpa angka "Tabel belum berisi angka. Isi kolom kedua dan seterusnya dengan angka, lalu coba lagi."; batas "Tabel paling banyak 20 baris dan 6 kolom."; sel bukan angka ditandai garis bawah + ikon "!" dengan keterangan "Bukan angka, tidak digambar." Tanpa server/internet: semua tetap jalan |
 | Peraga (v1.7, REQ-26–28, usulan) | Bilah alat: tombol "Peraga" → menu baris 1: Bandul, Gerak parabola, Pegas, Bidang miring, Kuis; baris 2: Indikator asam-basa, Logam + asam, Kelarutan fenol, Pembakaran. Kartu "Simulasi: {nama}" / "Lab virtual: {nama}": adegan, pembacaan rumus, penggeser "{label}: {nilai}", pilihan "{label}: {nama}" (ketuk = berikutnya), tombol "Putar"/"Jeda" dan "Ulang". Berhasil: "{Nama} ditempel. Atur nilainya, lalu tekan Putar." Menu pintar: "Peraga: {nama}". |
 | Kuis (v1.7, REQ-27, usulan) | Dialog "Kuis pencocokan": "Judul kuis" (bawaan "Pasangkan dengan benar"), baris "Kiri (soal) n" ↔ "Kanan (jawaban) n" (maks 6, 60 huruf), "Tambah pasangan", "Isi dari papan (AI)" ("AI menyusun pasangan dari isi papan…"; gagal: "AI belum bisa menyusun kuis dari papan ini. Tulis pasangannya sendiri."), "Batal" / "Buat kuis"; validasi "Isi paling sedikit 2 pasangan lengkap." Di papan: judul, "Skor a / b", kartu kiri/kanan (benar: hijau + centang; salah: merah; terpilih: biru), "Acak ulang". Berhasil: "Kuis ditempel. Siswa mengetuk kartu kiri lalu pasangannya di kanan." |
@@ -462,6 +463,8 @@ Setelah berhasil:
 | Grafik | Chart, Plot | Objek grafik interaktif di papan |
 | Penggeser | Slider | Pengatur nilai parameter grafik |
 | Tabel | Table, Spreadsheet | Objek tabel di papan (REQ-21) |
+| Pinyin & arti | Terjemahkan, Translate | Tombol menu pintar untuk tulisan Mandarin (REQ-30) |
+| Dengarkan / Pelan | Play, Putar suara | Suara Mandarin dari panel (REQ-30) |
 | Garis / Batang / Titik | Line / Bar / Scatter | Jenis grafik dari tabel |
 | Latar | Background, Template | PDF atau gambar di belakang tulisan |
 | Pengaturan | Konfigurasi, Setting | |
@@ -481,6 +484,7 @@ Setelah berhasil:
 | 0.4 | 2026-10-14 | SCR-06, TSK-10 | Draft — Ganti PIN admin di Pengaturan | AI (atas jawaban pemilik) |
 | 1.0 | 2026-10-14 | Semua (SCR-01 s/d SCR-07) | **Disetujui** | Pemilik (Sukardi) |
 | 1.2 | 2026-10-14 | SCR-05, pola Pilih area | Jadikan grafik + grafik interaktif (REQ-20) | Pemilik (persetujuan usulan), teks AI |
+| 1.9 | 2026-10-15 | SCR-01 Pinyin & arti, kartu Mandarin | Teks usulan AI (REQ-30 disetujui pemilik; teks dikonfirmasi saat uji) | AI |
 | 1.8 | 2026-10-15 | SCR-01 Tabel, Jadikan grafik dari tabel | Teks usulan AI (REQ-21 disetujui pemilik; teks dikonfirmasi sebelum/saat uji) | AI |
 | 1.7 | 2026-10-15 | SCR-01 Peraga, Kuis, sketsa → 3D, kapur & tema papan | Teks usulan AI (dibangun dulu, dikonfirmasi saat uji) | AI |
 | 1.6 | 2026-10-15 | SCR-01 bangun ruang, kimia, rekam kelas | Teks usulan AI (dibangun dulu, dikonfirmasi saat uji) | AI |

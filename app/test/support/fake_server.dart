@@ -59,6 +59,26 @@ class FakeServer {
     {'id': 'natrium-klorin', 'judul': 'Reaksi natrium dengan gas klorin'},
   ];
 
+  /// Hanzi /rumus/kenali reports when [insightKind] is `mandarin` (REQ-30).
+  String hanzi = '学习';
+
+  /// What /mandarin/arti answers; [mandarinFailure] makes it fail.
+  Map<String, Object?> mandarinAnswer = {
+    'hanzi': '学习',
+    'pinyin': 'xué xí',
+    'kata': [
+      {'hanzi': '学', 'pinyin': 'xué', 'arti': 'belajar', 'sumber': 'kamus'},
+      {
+        'hanzi': '习',
+        'pinyin': 'xí',
+        'arti': 'to practice',
+        'sumber': 'inggris',
+      },
+    ],
+    'terjemahan': 'Belajar',
+  };
+  (int, String)? mandarinFailure;
+
   /// When set, /rumus/kenali answers with this status and code.
   (int, String)? insightFailure;
 
@@ -170,6 +190,19 @@ class FakeServer {
           'lebar': typesetWidth,
           'tinggi': typesetHeight,
         };
+        if (kind == 'mandarin') {
+          return _json(200, {
+            'jenis': kind,
+            'hanzi': hanzi,
+            'rumus': const [],
+            'grafik': null,
+            'rapi': null,
+            'penyelesaian': null,
+            'zat': const [],
+            'video': const [],
+            'durasi_ms': 40,
+          });
+        }
         return _json(200, {
           'jenis': kind,
           'rumus': ['x^{2} = 4'],
@@ -184,6 +217,12 @@ class FakeServer {
           'video': kind == 'kimia' ? videos : const [],
           'durasi_ms': 900,
         });
+      case '/mandarin/arti':
+        final failure = mandarinFailure;
+        if (failure != null) {
+          return _json(failure.$1, {'kode': failure.$2, 'pesan': 'x'});
+        }
+        return _json(200, mandarinAnswer);
       case '/kelas/ringkas':
         lessonUploads.add(r.bodyBytes);
         return _json(200, {'id': 'job-1', 'status': 'antri'});

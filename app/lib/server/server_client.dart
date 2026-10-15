@@ -271,6 +271,45 @@ class ServerClient {
     }
   }
 
+  /// Pinyin & arti for [text] (REQ-30). The server answers even when its AI
+  /// is down (no translation then).
+  Future<MandarinReading> mandarin(
+    String text, {
+    String? providerId,
+    String? model,
+  }) async {
+    final body = await _send(
+      () => _client.post(
+        _uri('/mandarin/arti'),
+        headers: _headers,
+        body: jsonEncode({
+          'teks': text,
+          'penyedia': ?providerId,
+          'model': ?model,
+        }),
+      ),
+      timeout: const Duration(seconds: 70),
+    );
+    try {
+      return MandarinReading(
+        hanzi: body['hanzi'] as String,
+        pinyin: body['pinyin'] as String,
+        translation: body['terjemahan'] as String?,
+        words: [
+          for (final w in body['kata'] as List)
+            MandarinWord(
+              hanzi: (w as Map<String, dynamic>)['hanzi'] as String,
+              pinyin: w['pinyin'] as String,
+              meaning: w['arti'] as String,
+              source: w['sumber'] as String,
+            ),
+        ],
+      );
+    } on TypeError {
+      throw const ServerError();
+    }
+  }
+
   /// Menu pintar (REQ-22): reads the circled area once; the answer holds
   /// everything its buttons need. [color] is the handwriting's ink color.
   Future<FormulaInsight> recognizeFormula({
@@ -287,10 +326,13 @@ class ServerClient {
     );
     try {
       final solution = body['penyelesaian'] as Map<String, dynamic>?;
+      final tidy = body['rapi'] as Map<String, dynamic>?;
       return FormulaInsight(
         kind: body['jenis'] as String,
+        hanzi: body['hanzi'] as String?,
         graph: body['grafik'] as Map<String, dynamic>?,
-        tidy: TypesetImage.fromJson(body['rapi'] as Map<String, dynamic>),
+        // Mandarin areas (REQ-30) have no typeset formula.
+        tidy: tidy == null ? TypesetImage.none : TypesetImage.fromJson(tidy),
         solution: solution == null ? null : TypesetImage.fromJson(solution),
         formulas: [
           for (final f in (body['rumus'] as List?) ?? const []) f as String,
@@ -414,6 +456,7 @@ class FormulaInsight {
   const FormulaInsight({
     required this.kind,
     required this.tidy,
+    this.hanzi,
     this.graph,
     this.solution,
     this.videos = const [],
@@ -423,8 +466,12 @@ class FormulaInsight {
   /// The formulas as LaTeX (for the lesson summary, REQ-25).
   final List<String> formulas;
 
-  /// `fungsi`, `persamaan`, `ekspresi`, or `kimia` (REQ-24).
+  /// `fungsi`, `persamaan`, `ekspresi`, `kimia` (REQ-24), or `mandarin`
+  /// (REQ-30).
   final String kind;
+
+  /// Hanzi read in the area (mandarin only), for "Pinyin & arti".
+  final String? hanzi;
 
   /// School videos matching the formulas (kimia only).
   final List<VideoRef> videos;
@@ -470,6 +517,45 @@ class TypesetImage {
 
   final Uint8List png;
   final Size size;
+
+  /// No picture (an area with nothing to typeset).
+  static final none = TypesetImage(Uint8List(0), Size.zero);
+}
+
+/// One word of a Mandarin reading (REQ-30).
+class MandarinWord {
+  const MandarinWord({
+    required this.hanzi,
+    required this.pinyin,
+    required this.meaning,
+    required this.source,
+  });
+
+  final String hanzi;
+  final String pinyin;
+
+  /// Indonesian meaning, or the English one when [source] is `inggris`;
+  /// empty when the dictionary does not know the word.
+  final String meaning;
+
+  /// `kamus`, `inggris`, or `tidak_ada`.
+  final String source;
+}
+
+/// Pinyin & arti from the school server (REQ-30): pinyin and words from the
+/// dictionary, [translation] from the AI (null when the AI failed).
+class MandarinReading {
+  const MandarinReading({
+    required this.hanzi,
+    required this.pinyin,
+    required this.words,
+    this.translation,
+  });
+
+  final String hanzi;
+  final String pinyin;
+  final List<MandarinWord> words;
+  final String? translation;
 }
 
 class AiAnswer {

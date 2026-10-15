@@ -45,6 +45,8 @@ dependencies:
   flutter_secure_storage: ^11.2.0
   video_player: ^2.14.1
   record: ^7.1.2
+  # Suara Mandarin (REQ-30): mesin TTS bawaan Android, tanpa internet.
+  flutter_tts: ^4.2.5
 
 dev_dependencies:
   flutter_test:

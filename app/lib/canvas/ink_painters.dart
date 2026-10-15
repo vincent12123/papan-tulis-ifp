@@ -9,6 +9,8 @@ import 'ink_controller.dart';
 import 'item_painter.dart';
 import 'media_images.dart';
 import 'stroke.dart';
+import '../mandarin/mandarin_painter.dart';
+import '../mandarin/mandarin_voice.dart';
 import '../peraga/peraga_painter.dart';
 import '../peraga/quiz_painter.dart';
 
@@ -175,6 +177,7 @@ class LiveItemsPainter extends CustomPainter {
           controller.liveRevision,
           controller.committedRevision,
           viewport.revision,
+          MandarinVoiceStatus.available,
         ]),
       );
 
@@ -216,6 +219,8 @@ void _paintLive(
       );
     case QuizItem():
       paintQuiz(canvas, item, controller.quizState(item));
+    case MandarinItem():
+      paintMandarin(canvas, item, voice: MandarinVoiceStatus.available.value);
     default:
       paintItem(canvas, item, media);
   }

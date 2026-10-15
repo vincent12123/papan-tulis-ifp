@@ -184,11 +184,11 @@
 
 | ID | Requirement | Kriteria (Diberikan / Ketika / Maka) | Jenis | Cara cek | Status | Bukti |
 |---|---|---|---|---|---|---|
-| AC-190 | REQ-30 | **Diberikan** area berisi Hanzi tulisan tangan, **ketika** dilingkari, **maka** bilah menu pintar menawarkan "Pinyin & arti"; area tanpa aksara Han tidak menawarkannya | Positif / Negatif | AUTO | ☐ | |
-| AC-191 | REQ-30 | **Diberikan** teks 你好 / 学习 / 好好学习，天天向上, **ketika** server mengolahnya, **maka** pinyin bertanda nada benar (nǐ hǎo, xué xí, …) berasal dari pypinyin dan arti per kata dari kamus, bukan dari AI | Positif | AUTO | ☐ | |
-| AC-192 | REQ-30 | **Diberikan** AI mati atau terlalu lama, **ketika** Pinyin & arti, **maka** kartu tetap muncul dengan pinyin + arti per kata tanpa terjemahan kalimat (tanpa data contoh); tanpa jaringan/PIN → pesan menu pintar yang ada dan papan tidak berubah; tanpa PIN server menolak (401) | Negatif | AUTO | ☐ | |
-| AC-193 | REQ-30 | **Diberikan** kartu Mandarin, **ketika** dipindah/diubah ukuran/dihapus/Undo dan aplikasi dibuka ulang, **maka** perilaku seperti gambar dan kartu tersimpan utuh; terjemahan AI berlabel "Terjemahan AI — periksa sebelum dipakai" | Positif | AUTO | ☐ | |
-| AC-194 | REQ-30 | **Diberikan** panel dengan suara zh-CN, **ketika** Dengarkan / Pelan / ketuk kata, **maka** terdengar Hanzi yang sesuai; tanpa suara zh-CN tombol suara tersembunyi dan pesan cara memasang tampil | Positif / Negatif | AUTO + MANUAL | ☐ | |
+| AC-190 | REQ-30 | **Diberikan** area berisi Hanzi tulisan tangan, **ketika** dilingkari, **maka** bilah menu pintar menawarkan "Pinyin & arti"; area tanpa aksara Han tidak menawarkannya | Positif / Negatif | AUTO | ✅ | 2026-10-15: test_mandarin (server: Hanzi didahulukan, ragu/tercampur → menu rumus), mandarin_test (aplikasi ×2) |
+| AC-191 | REQ-30 | **Diberikan** teks 你好 / 学习 / 好好学习，天天向上, **ketika** server mengolahnya, **maka** pinyin bertanda nada benar (nǐ hǎo, xué xí, …) berasal dari pypinyin dan arti per kata dari kamus, bukan dari AI | Positif | AUTO | ✅ | 2026-10-15: test_mandarin (pinyin & kata dari kamus; AI hanya terjemahan + arti yang belum ada, diingat) |
+| AC-192 | REQ-30 | **Diberikan** AI mati atau terlalu lama, **ketika** Pinyin & arti, **maka** kartu tetap muncul dengan pinyin + arti per kata tanpa terjemahan kalimat (tanpa data contoh); tanpa jaringan/PIN → pesan menu pintar yang ada dan papan tidak berubah; tanpa PIN server menolak (401) | Negatif | AUTO | ✅ | 2026-10-15: test_mandarin (AI mati, tanpa Hanzi 422, 401, teks tidak tercatat), mandarin_test (503/422/tanpa terjemahan) |
+| AC-193 | REQ-30 | **Diberikan** kartu Mandarin, **ketika** dipindah/diubah ukuran/dihapus/Undo dan aplikasi dibuka ulang, **maka** perilaku seperti gambar dan kartu tersimpan utuh; terjemahan AI berlabel "Terjemahan AI — periksa sebelum dipakai" | Positif | AUTO | ✅ | 2026-10-15: mandarin_test (kartu di samping, Undo, codec + data rusak); screenshot 13-kartu-mandarin |
+| AC-194 | REQ-30 | **Diberikan** panel dengan suara zh-CN, **ketika** Dengarkan / Pelan / ketuk kata, **maka** terdengar Hanzi yang sesuai; tanpa suara zh-CN tombol suara tersembunyi dan pesan cara memasang tampil | Positif / Negatif | AUTO + MANUAL | ✅ / ⏳ panel | 2026-10-15: mandarin_test (suara palsu: kata, Pelan, Dengarkan; tanpa suara tidak ada target). Suara zh-CN di panel Hisense belum dicek |
 | AC-195 | REQ-30 | **Diberikan** 20 contoh Hanzi tulisan tangan guru Mandarin di panel, **ketika** dilingkari, **maka** pengenalan cukup akurat menurut guru (target usulan ≥ 16/20 benar; sisanya ditolak, bukan salah diam-diam) | Positif | MANUAL | ⏳ | 2026-10-15 uji awal (bukan tulisan asli): 100 gambar dari font gaya tulisan tangan — rapi 60/60 benar; semi-kursif 15 benar, 2 ditolak, 3 salah; 草书 4/10/6 (`python -m app.cli uji-hanzi`, test_hanzi 11 test). Menunggu tulisan guru Mandarin di panel |
 
 ## H. Pengaturan (SPEC 5.8)
@@ -300,7 +300,7 @@
 | REQ-19 | SCR-05, SCR-06 | AC-78–AC-82, AC-94–AC-99 | ☐ |
 | REQ-20 | SCR-01, SCR-05 | AC-83–AC-88 | ☐ |
 | REQ-21 | SCR-01 (Tabel, Jadikan grafik dari tabel) | AC-180–AC-187 | ⏳ uji panel (AC-180–186 ✅) |
-| REQ-30 | SCR-01 (menu pintar, kartu Mandarin) | AC-190–AC-195 | ☐ |
+| REQ-30 | SCR-01 (menu pintar, kartu Mandarin) | AC-190–AC-195 | ⏳ uji panel (AC-190–193 ✅) |
 | REQ-22 | SCR-01 (menu pintar) | AC-100–AC-104 | ⏳ uji panel |
 | REQ-23 | SCR-01 (Bentuk → bangun ruang) | AC-110–AC-113 | ⏳ uji panel |
 | REQ-24 | SCR-01 (menu pintar kimia, video) | AC-120–AC-121 | ⏳ uji panel |

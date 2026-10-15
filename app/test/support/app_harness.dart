@@ -6,6 +6,7 @@ import 'package:whiteboard_ifp/app_shell.dart';
 import 'package:whiteboard_ifp/data/board_repository.dart';
 import 'package:whiteboard_ifp/data/media_store.dart';
 import 'package:whiteboard_ifp/lesson/lesson_session.dart';
+import 'package:whiteboard_ifp/mandarin/mandarin_voice.dart';
 import 'package:whiteboard_ifp/server/settings_store.dart';
 import 'package:whiteboard_ifp/settings/settings_screen.dart';
 import 'package:whiteboard_ifp/canvas/ink_canvas.dart';
@@ -44,6 +45,7 @@ Future<MemoryBoardRepository> pumpApp(
   MediaStore? media,
   LessonRecorder Function()? recorder,
   Future<String> Function()? lessonPath,
+  MandarinVoice Function()? voice,
 }) async {
   panelSize(tester);
   final r = repo ?? MemoryBoardRepository();
@@ -58,6 +60,7 @@ Future<MemoryBoardRepository> pumpApp(
         media: media == null ? null : Future.value(media),
         recorder: recorder,
         lessonPath: lessonPath,
+        voice: voice,
       ),
     ),
   );
@@ -66,6 +69,7 @@ Future<MemoryBoardRepository> pumpApp(
     Notices.hide();
     // Unmount so the open board cancels its timers.
     await tester.pumpWidget(const SizedBox());
+    MandarinVoiceStatus.available.value = false;
   });
   return r;
 }

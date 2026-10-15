@@ -16,6 +16,9 @@ typedef FormulaRecognizer = Future<FormulaInsight> Function(
   String color,
 );
 
+/// Pinyin & arti for Hanzi text on the school server (REQ-30).
+typedef MandarinLookup = Future<MandarinReading> Function(String text);
+
 /// Reads a circled area on the school server (REQ-22).
 typedef AreaRecognizer = Future<FormulaInsight> Function(Rect area);
 
@@ -25,6 +28,7 @@ class SmartActions {
     required this.onGraph,
     required this.onTidy,
     required this.onSolve,
+    this.onMandarin,
     this.onVideo,
     this.onPeraga,
     this.onSketch,
@@ -33,6 +37,9 @@ class SmartActions {
   final void Function(Rect area, FormulaInsight insight) onGraph;
   final Future<void> Function(Rect area, FormulaInsight insight) onTidy;
   final void Function(Rect area, FormulaInsight insight) onSolve;
+
+  /// Pinyin & arti card for Hanzi in the area (REQ-30).
+  final Future<void> Function(Rect area, FormulaInsight insight)? onMandarin;
 
   /// Opens the matching school videos (kimia, REQ-24).
   final void Function(FormulaInsight insight)? onVideo;
@@ -67,6 +74,7 @@ class SmartAreaBar extends StatefulWidget {
   static const graph = 'Jadikan grafik';
   static const tidy = 'Rapikan rumus';
   static const solve = 'Selesaikan';
+  static const mandarin = 'Pinyin & arti';
   static const balance = 'Setarakan';
   static String videos(int n) => 'Video eksperimen ($n)';
   static String peraga(String name) => 'Peraga: $name';
@@ -250,6 +258,18 @@ class _SmartAreaBarState extends State<SmartAreaBar> {
           icon: Icon(icon),
           label: Text(label),
         );
+    if (insight.kind == 'mandarin') {
+      // Chinese writing: no formula actions (REQ-30).
+      final onMandarin = actions.onMandarin;
+      return [
+        if (onMandarin != null)
+          primary(
+            SmartAreaBar.mandarin,
+            Icons.translate,
+            () => _run(onMandarin),
+          ),
+      ];
+    }
     return [
       if (insight.kind == 'fungsi' && insight.graph != null)
         primary(

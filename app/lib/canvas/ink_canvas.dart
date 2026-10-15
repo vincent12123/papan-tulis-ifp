@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter/scheduler.dart';
 
+import '../mandarin/mandarin_painter.dart';
 import '../peraga/peraga_painter.dart';
 import '../peraga/quiz_painter.dart';
 import '../solid/solid_painter.dart';
@@ -38,6 +39,7 @@ class InkCanvas extends StatefulWidget {
     this.media,
     this.color = AppColors.canvas,
     this.onTableCell,
+    this.onSpeak,
   });
 
   final InkController controller;
@@ -65,6 +67,9 @@ class InkCanvas extends StatefulWidget {
   /// A table cell was tapped with a tool other than Pilih or Geser
   /// (REQ-21): the board opens the table editor at that cell.
   final void Function(TableItem table, int row, int col)? onTableCell;
+
+  /// A word or the sentence on a Mandarin card was tapped (REQ-30).
+  final void Function(String text, bool slow)? onSpeak;
 
   /// Eraser radius on screen, in logical pixels.
   static const eraserScreenRadius = 24.0;
@@ -457,6 +462,8 @@ class _InkCanvasState extends State<InkCanvas> with TickerProviderStateMixin {
         ink.endTransform();
       case (QuizItem q, QuizTarget target):
         ink.quizTap(q, target);
+      case (MandarinItem _, MandarinSpeak(:final text, :final slow)):
+        widget.onSpeak?.call(text, slow);
     }
   }
 

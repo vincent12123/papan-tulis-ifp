@@ -96,6 +96,7 @@ app/                       Aplikasi Flutter (Android)
   lib/boards/              SCR-02 Daftar Papan
   lib/data/                SQLite: skema (app_database), repository, codec objek, media_store (berkas gambar/latar)
   lib/app_shell.dart       Alur buka aplikasi (papan terakhir), memuat, papan rusak
+  lib/mandarin/            Kartu pinyin & arti + suara Mandarin (REQ-30)
   lib/table/               Tabel → grafik (REQ-21): data sel, penggambar tabel & grafik data, dialog isi tabel
   lib/diagnostics/         Alat ukur uji panel (hanya di APK uji: --dart-define=DIAGNOSTICS=true)
   test/                    Test per acceptance criteria (nama berisi ID AC)

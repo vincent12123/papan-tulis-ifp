@@ -16,6 +16,7 @@ abstract final class ObjectKind {
   static const peraga = 'peraga';
   static const quiz = 'kuis';
   static const table = 'tabel';
+  static const mandarin = 'mandarin';
 
   static String of(PageItem item) => switch (item) {
     Stroke() => stroke,
@@ -28,6 +29,7 @@ abstract final class ObjectKind {
     QuizItem() => quiz,
     TableItem() => table,
     ChartItem() => graph,
+    MandarinItem() => mandarin,
   };
 }
 
@@ -94,6 +96,19 @@ abstract final class ItemCodec {
       'w': _round(item.rect.width),
       'h': _round(item.rect.height),
       'sel': item.cells,
+    }),
+    MandarinItem() => jsonEncode({
+      'v': 1,
+      'x': _round(item.rect.left),
+      'y': _round(item.rect.top),
+      'w': _round(item.rect.width),
+      'h': _round(item.rect.height),
+      'hanzi': item.hanzi,
+      'pinyin': item.pinyin,
+      'kata': [
+        for (final w in item.words) [w.hanzi, w.pinyin, w.meaning, w.source],
+      ],
+      'terjemahan': ?item.translation,
     }),
     SolidItem() => jsonEncode({
       'v': 1,
@@ -214,6 +229,39 @@ abstract final class ItemCodec {
         final j = _map(id, data);
         if (j.containsKey('jenis')) return _decodeChart(id, z, j);
         return _decodeGraph(id, z, j);
+      case ObjectKind.mandarin:
+        final j = _map(id, data);
+        final rect = _rect(j);
+        final words = j['kata'];
+        final translation = j['terjemahan'];
+        if (rect == null ||
+            j['hanzi'] is! String ||
+            j['pinyin'] is! String ||
+            (translation != null && translation is! String) ||
+            words is! List ||
+            words.length > MandarinItem.maxWords ||
+            words.any(
+              (w) => w is! List || w.length != 4 || w.any((s) => s is! String),
+            )) {
+          throw FormatException('Kartu Mandarin $id rusak');
+        }
+        return MandarinItem(
+          id: id,
+          z: z,
+          rect: rect,
+          hanzi: j['hanzi'] as String,
+          pinyin: j['pinyin'] as String,
+          translation: translation as String?,
+          words: [
+            for (final w in words.cast<List<dynamic>>())
+              (
+                hanzi: w[0] as String,
+                pinyin: w[1] as String,
+                meaning: w[2] as String,
+                source: w[3] as String,
+              ),
+          ],
+        );
       case ObjectKind.table:
         final j = _map(id, data);
         final rect = _rect(j);
