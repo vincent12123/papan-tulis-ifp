@@ -1,0 +1,23 @@
+# Secrets
+*.jks
+*.keystore
+key.properties
+.env
+server/.env
+
+# Python
+server/.venv/
+server/models/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+server/data/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+dist/
+server/penyedia.toml

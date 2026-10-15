@@ -1,0 +1,15 @@
+fastapi==0.143.0
+uvicorn[standard]==0.54.0
+httpx==0.28.1
+# Jadikan grafik tanpa AI (SPEC 1.8): pengenal rumus Pix2Text MFR + SymPy
+onnxruntime==1.31.0
+tokenizers==0.22.2
+numpy==2.5.4
+pillow==12.3.0
+sympy==1.14.0
+antlr4-python3-runtime==4.11.0
+# Menu pintar (SPEC 1.9): rumus cetak untuk "Rapikan rumus"
+matplotlib==3.11.2
+# Rekam kelas (SPEC 1.9): ucapan ke teks di server sendiri
+faster-whisper==1.2.1
+av==18.0.0

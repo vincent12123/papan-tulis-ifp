@@ -1,0 +1,17 @@
+[Unit]
+Description=Server Papan Tulis (Whiteboard IFP): PIN admin dan asisten AI
+After=network.target
+
+[Service]
+Type=simple
+User=sukardi
+Group=www-data
+WorkingDirectory=/var/www/papan.karyabangsa.sch.id/server
+EnvironmentFile=/var/www/papan.karyabangsa.sch.id/server/.env
+ExecStart=/var/www/papan.karyabangsa.sch.id/server/.venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 3030 --proxy-headers --no-access-log
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target

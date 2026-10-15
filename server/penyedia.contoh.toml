@@ -1,0 +1,73 @@
+# Daftar penyedia AI (SPEC §4.5a). Salin menjadi `penyedia.toml` di server.
+# Kunci API TIDAK ditulis di sini: isi nama variabel lingkungan di
+# `kunci_api_env`, lalu taruh nilainya di `.env` (tidak masuk git).
+#
+# Ollama cloud adalah penyedia bawaan sekaligus cadangan: jangan dinonaktifkan.
+# Nama model di bawah hanya contoh — samakan dengan model yang tersedia di akun.
+
+bawaan = "ollama"
+
+[[penyedia]]
+id = "ollama"
+nama_tampil = "Ollama cloud"
+jenis_adaptor = "ollama"
+alamat_api = "https://ollama.com"
+kunci_api_env = "OLLAMA_API_KEY"
+aktif = true
+model_bawaan = "gpt-oss:120b"
+  [[penyedia.model]]
+  nama = "gpt-oss:120b"
+  dukung_gambar = false
+  # Model yang bisa membaca gambar tulisan tangan (dipakai Jadikan grafik dan
+  # semua aksi AI bergambar, P-03). Contoh saja: salin nama PERSIS dari
+  # ollama.com (filter "cloud" + "vision"), mis. keluarga qwen3-vl atau gemma3.
+  [[penyedia.model]]
+  nama = "nama-model-vision-ollama"
+  dukung_gambar = true
+
+[[penyedia]]
+id = "openai"
+nama_tampil = "OpenAI"
+jenis_adaptor = "openai"
+kunci_api_env = "OPENAI_API_KEY"
+aktif = false
+model_bawaan = "nama-model-openai"
+  [[penyedia.model]]
+  nama = "nama-model-openai"
+  dukung_gambar = true
+
+[[penyedia]]
+id = "claude"
+nama_tampil = "Claude (Anthropic)"
+jenis_adaptor = "anthropic"
+kunci_api_env = "ANTHROPIC_API_KEY"
+aktif = false
+model_bawaan = "claude-sonnet-5-5"
+  [[penyedia.model]]
+  nama = "claude-sonnet-5-5"
+  dukung_gambar = true
+
+[[penyedia]]
+id = "gemini"
+nama_tampil = "Gemini (Google)"
+jenis_adaptor = "gemini"
+kunci_api_env = "GEMINI_API_KEY"
+aktif = false
+model_bawaan = "nama-model-gemini"
+  [[penyedia.model]]
+  nama = "nama-model-gemini"
+  dukung_gambar = true
+
+# "Lainnya": layanan apa pun yang kompatibel dengan API OpenAI
+# (OpenRouter, Groq, DeepSeek, Ollama lokal, ...).
+[[penyedia]]
+id = "lainnya"
+nama_tampil = "OpenRouter"
+jenis_adaptor = "openai_kompatibel"
+alamat_api = "https://openrouter.ai/api/v1"
+kunci_api_env = "OPENROUTER_API_KEY"
+aktif = false
+model_bawaan = "nama-model"
+  [[penyedia.model]]
+  nama = "nama-model"
+  dukung_gambar = false
