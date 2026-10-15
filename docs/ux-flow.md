@@ -6,7 +6,7 @@
 > Layar yang belum berstatus **Disetujui** tidak boleh dikoding.
 > Panduan pengisian: `references/panduan-ui-ux.md` di skill SDD.
 
-- **Versi:** 1.7
+- **Versi:** 1.8
 - **Status:** Disetujui (SCR-06 v1.1: rincian usulan menunggu konfirmasi)
 - **Mengacu SPEC versi:** 1.4
 
@@ -429,6 +429,7 @@ Setelah berhasil:
 | Indikator simpan | Teks kecil "Menyimpan…" / "Tersimpan" di bilah atas; tidak menghalangi menulis |
 | Proses panjang | Indikator kemajuan dengan keterangan langkah dan tombol Batalkan; tidak mengunci kanvas kecuali dialog Bagikan dan AI |
 | Pilih area (lasso) | Alat Pilih: lingkari dengan jari/stylus di tempat kosong; area terpilih diberi garis putus-putus dan **bilah di bawah area** (di atas area bila tidak muat) berisi tombol utama "Jadikan grafik" (v1.3, seperti video referensi; "Ubah ke teks" menyusul REQ-10). Aksi AI lain lewat tombol "Asisten AI" di bilah atas. Mengetuk gambar/bentuk/grafik tetap memilih objek itu |
+| Tabel (v1.8, REQ-21, teks usulan AI) | Bilah alat: tombol "Tabel" → dialog "Sisipkan tabel": "Baris" dan "Kolom" dengan tombol − / + (bawaan 5 × 3; batas 2–20 dan 2–6), "Batal" / "Sisipkan". Berhasil: "Tabel ditempel. Ketuk sel untuk mengisinya." Sel: ketuk → keyboard layar; baris pertama tebal (judul kolom), petunjuk samar di sel judul kosong "Judul". Tabel terpilih (Pilih): bingkai + pegangan seperti gambar, tombol "Tambah baris", "Tambah kolom", "Jadikan grafik", dan "Hapus". Jadikan grafik → menu "Garis", "Batang", "Titik" (Garis/Titik nonaktif dengan keterangan "Garis dan Titik butuh angka di kolom pertama." bila kolom pertama berisi teks). Berhasil: "Grafik ditempel di samping tabel. Ubah angka di tabel, grafik ikut berubah." Gagal: tanpa angka "Tabel belum berisi angka. Isi kolom kedua dan seterusnya dengan angka, lalu coba lagi."; batas "Tabel paling banyak 20 baris dan 6 kolom."; sel bukan angka ditandai garis bawah + ikon "!" dengan keterangan "Bukan angka, tidak digambar." Tanpa server/internet: semua tetap jalan |
 | Peraga (v1.7, REQ-26–28, usulan) | Bilah alat: tombol "Peraga" → menu baris 1: Bandul, Gerak parabola, Pegas, Bidang miring, Kuis; baris 2: Indikator asam-basa, Logam + asam, Kelarutan fenol, Pembakaran. Kartu "Simulasi: {nama}" / "Lab virtual: {nama}": adegan, pembacaan rumus, penggeser "{label}: {nilai}", pilihan "{label}: {nama}" (ketuk = berikutnya), tombol "Putar"/"Jeda" dan "Ulang". Berhasil: "{Nama} ditempel. Atur nilainya, lalu tekan Putar." Menu pintar: "Peraga: {nama}". |
 | Kuis (v1.7, REQ-27, usulan) | Dialog "Kuis pencocokan": "Judul kuis" (bawaan "Pasangkan dengan benar"), baris "Kiri (soal) n" ↔ "Kanan (jawaban) n" (maks 6, 60 huruf), "Tambah pasangan", "Isi dari papan (AI)" ("AI menyusun pasangan dari isi papan…"; gagal: "AI belum bisa menyusun kuis dari papan ini. Tulis pasangannya sendiri."), "Batal" / "Buat kuis"; validasi "Isi paling sedikit 2 pasangan lengkap." Di papan: judul, "Skor a / b", kartu kiri/kanan (benar: hijau + centang; salah: merah; terpilih: biru), "Acak ulang". Berhasil: "Kuis ditempel. Siswa mengetuk kartu kiri lalu pasangannya di kanan." |
 | Sketsa → bangun ruang (v1.7, REQ-23, usulan) | Menu pintar pada sketsa persegi/segitiga/lingkaran: "Jadikan {Kubus/Balok/Limas/Kerucut/Bola/Tabung}". Berhasil: "Sketsa menjadi {nama}. Tekan Undo untuk kembali ke sketsa." |
@@ -460,6 +461,8 @@ Setelah berhasil:
 | Jadikan grafik | Plot, Visualisasi | REQ-20; v1.3 tombol di bilah bawah area, tanpa AI (pengenal rumus) |
 | Grafik | Chart, Plot | Objek grafik interaktif di papan |
 | Penggeser | Slider | Pengatur nilai parameter grafik |
+| Tabel | Table, Spreadsheet | Objek tabel di papan (REQ-21) |
+| Garis / Batang / Titik | Line / Bar / Scatter | Jenis grafik dari tabel |
 | Latar | Background, Template | PDF atau gambar di belakang tulisan |
 | Pengaturan | Konfigurasi, Setting | |
 | Penyedia AI | Provider, Vendor | Ollama cloud, OpenAI, Claude, Gemini, atau lainnya |
@@ -478,6 +481,7 @@ Setelah berhasil:
 | 0.4 | 2026-10-14 | SCR-06, TSK-10 | Draft — Ganti PIN admin di Pengaturan | AI (atas jawaban pemilik) |
 | 1.0 | 2026-10-14 | Semua (SCR-01 s/d SCR-07) | **Disetujui** | Pemilik (Sukardi) |
 | 1.2 | 2026-10-14 | SCR-05, pola Pilih area | Jadikan grafik + grafik interaktif (REQ-20) | Pemilik (persetujuan usulan), teks AI |
+| 1.8 | 2026-10-15 | SCR-01 Tabel, Jadikan grafik dari tabel | Teks usulan AI (REQ-21 disetujui pemilik; teks dikonfirmasi sebelum/saat uji) | AI |
 | 1.7 | 2026-10-15 | SCR-01 Peraga, Kuis, sketsa → 3D, kapur & tema papan | Teks usulan AI (dibangun dulu, dikonfirmasi saat uji) | AI |
 | 1.6 | 2026-10-15 | SCR-01 bangun ruang, kimia, rekam kelas | Teks usulan AI (dibangun dulu, dikonfirmasi saat uji) | AI |
 | 1.5 | 2026-10-15 | SCR-01 menu pintar | Pengenalan otomatis saat melingkari; aksi sesuai jenis isi; Rapikan rumus mengganti tulisan; Selesaikan | Pemilik (pilihan: otomatis, diganti di tempat), teks usulan AI |

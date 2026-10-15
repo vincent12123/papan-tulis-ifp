@@ -167,6 +167,19 @@
 | AC-162 | REQ-26, REQ-28 | **Diberikan** rumus periode bandul/pegas atau reaksi dengan zat yang cocok, **maka** menu pintar menawarkan "Peraga: …" yang sesuai | Positif / Negatif | AUTO | ✅ | 2026-10-15: board_extras_test |
 | AC-170 | REQ-29 | **Diberikan** Warna, **ketika** Kapur dan Papan hijau kapur dipilih, **maka** goresan baru bertekstur kapur (tersimpan), papan hijau, pena hitam berganti putih, tema tersimpan per papan; goresan lama tetap terbaca | Positif | AUTO + MANUAL | ✅ / ⏳ panel | 2026-10-15: board_extras_test |
 
+### G7. Tabel → grafik (REQ-21)
+
+| ID | Requirement | Kriteria (Diberikan / Ketika / Maka) | Jenis | Cara cek | Status | Bukti |
+|---|---|---|---|---|---|---|
+| AC-180 | REQ-21 | **Diberikan** papan, **ketika** Tabel → 4 baris × 3 kolom → Sisipkan, **maka** tabel kosong 4 × 3 muncul di tengah layar dan terpilih; satu Undo menghapusnya; tabel tersimpan bersama papan | Positif | AUTO | ☐ | |
+| AC-181 | REQ-21 | **Diberikan** tabel, **ketika** sel diketuk dengan Pena lalu "12,5" diketik, **maka** sel berisi 12,5 (dibaca sebagai angka 12.5), tidak ada tinta di badan tabel, dan satu Undo mengembalikan isi lama; dengan Geser, ketukan tidak membuka keyboard | Positif / Negatif | AUTO | ☐ | |
+| AC-182 | REQ-21 | **Diberikan** tabel 20 baris atau 6 kolom, **ketika** Tambah baris / Tambah kolom, **maka** ditolak dengan pesan batas dan tabel tidak berubah; pilihan di bawah 2 atau di atas batas tidak bisa disisipkan | Negatif | AUTO | ☐ | |
+| AC-183 | REQ-21 | **Diberikan** tabel berangka di kolom pertama dan 2 seri, **ketika** Jadikan grafik → Garis / Batang / Titik, **maka** grafik muncul di samping tabel dengan 2 seri, sumbu menyesuaikan nilai, legenda bertuliskan judul kolom; bila kolom pertama berisi teks hanya Batang yang bisa dipilih (batang berkelompok) | Positif / Negatif | AUTO | ☐ | |
+| AC-184 | REQ-21 | **Diberikan** grafik dari tabel, **ketika** angka di tabel diubah, **maka** grafik langsung berubah dan tersimpan; sel kosong/bukan angka dilewati dan ditandai (garis bawah + ikon); tabel tanpa angka → pesan, tidak ada grafik | Positif / Negatif | AUTO | ☐ | |
+| AC-185 | REQ-21 | **Diberikan** panel tanpa internet dan tanpa pengaturan server, **ketika** Jadikan grafik dari tabel, **maka** grafik tetap dibuat dan tidak ada panggilan ke server | Negatif | AUTO | ☐ | |
+| AC-186 | REQ-21 | **Diberikan** tabel dan grafiknya, **ketika** aplikasi dibuka ulang, **maka** keduanya utuh dan masih terhubung; **ketika** tabel dihapus, **maka** grafik tetap dengan data terakhir dan tidak terhubung lagi; Penghapus tidak menghapus tabel | Positif / Negatif | AUTO | ☐ | |
+| AC-187 | REQ-21 | **Diberikan** panel Hisense, **ketika** guru mengisi tabel 5 × 3 dengan keyboard layar lalu membuat grafik, **maka** selesai tanpa bantuan, teks sel ≥ 20 sp terbaca dari belakang kelas, dan menulis di luar tabel tetap mulus (NFR-30) | Positif | MANUAL | ☐ | |
+
 ## H. Pengaturan (SPEC 5.8)
 
 | ID | Req | Kriteria | Jenis | Metode | Status | Bukti |
@@ -275,6 +288,7 @@
 | REQ-18 | SCR-01, SCR-04, SCR-05 | AC-34, AC-65, AC-76 | ☐ |
 | REQ-19 | SCR-05, SCR-06 | AC-78–AC-82, AC-94–AC-99 | ☐ |
 | REQ-20 | SCR-01, SCR-05 | AC-83–AC-88 | ☐ |
+| REQ-21 | SCR-01 (Tabel, Jadikan grafik dari tabel) | AC-180–AC-187 | ☐ |
 | REQ-22 | SCR-01 (menu pintar) | AC-100–AC-104 | ⏳ uji panel |
 | REQ-23 | SCR-01 (Bentuk → bangun ruang) | AC-110–AC-113 | ⏳ uji panel |
 | REQ-24 | SCR-01 (menu pintar kimia, video) | AC-120–AC-121 | ⏳ uji panel |

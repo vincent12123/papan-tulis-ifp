@@ -7,11 +7,13 @@
 
 ## Status Saat Ini
 
-- **Checkpoint aktif:** 11–14 selesai di kode (simulasi fisika, kuis, lab kimia virtual, sketsa → 3D, kapur + tema papan; dari prototipe HTML pemilik). Berikutnya: pasang server (jenis AI `kuis`), uji semuanya di panel (Checkpoint 15).
-- **Versi SPEC yang dipakai:** 1.11 (ux-flow 1.7)
-- **Terakhir diperbarui:** 2026-10-14 oleh AI
+- **Checkpoint aktif:** 11–14 selesai di kode. Berikutnya: **Checkpoint 15 Tabel → grafik (REQ-21, disetujui SPEC 1.12)**; lalu uji semuanya di panel (Checkpoint 16). Usulan REQ-30 Mandarin (SPEC §12 1.13) menunggu persetujuan rincian.
+- **Versi SPEC yang dipakai:** 1.12 (ux-flow 1.8)
+- **Terakhir diperbarui:** 2026-10-15 oleh AI
+- **Repo:** https://github.com/vincent12123/papan-tulis-ifp (publik, branch main)
 
 ## ✅ Sudah Selesai
+- **SPEC 1.12 (2026-10-15):** REQ-21 Tabel → grafik disetujui dan diterapkan (§3.1, §4.3 jenis `tabel`, §5.4, Checkpoint 15); AC-180–AC-187; pola Tabel di ux-flow 1.8 (teks usulan). Kode tempelan dari luar (OCR tabel AI + Mandarin) ditinjau dan tidak dipakai.
 - **Checkpoint 11–14 (REQ-26–29 + sketsa REQ-23):** `lib/peraga/` (katalog 8 peraga + rumus, penggambar adegan, kuis + editor), lapisan hidup `LiveItemsPainter` + ticker di `InkCanvas` (hanya jalan saat ada peraga diputar), objek `peraga` & `kuis` (codec), tombol "Peraga", menu pintar `smart_suggest.dart` (saran peraga, sketsa → bangun), goresan kapur (tekstur butiran, field `k`), tema papan (app_state per papan); server: jenis AI `kuis` (`parse_quiz`).
 - **Checkpoint 8 — Bangun ruang 3D (REQ-23):** `lib/solid/` (geometri + jaring berengsel + penggambar sendiri), objek `bangun` (codec), menu Bentuk baris kedua, putar dengan jari, tombol Jaring-jaring (animasi) / Bidang potong di dalam objek.
 - **Checkpoint 9 — Kimia + video (REQ-24):** server `formula_chem.py` (baca rumus/reaksi, penyetaraan SymPy), `video_library.py` (katalog `video/katalog.toml`), `GET /video/{id}`; aplikasi: bilah kimia (Rapikan, Setarakan, Video eksperimen), `video_dialog.dart` (video_player).
