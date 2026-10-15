@@ -126,6 +126,10 @@ class Settings:
     formula_model_dir: Path = field(default_factory=lambda: Path("models/pix2text-mfr-1.5"))
     # Video eksperimen and katalog.toml (REQ-24).
     video_dir: Path = field(default_factory=lambda: Path("video"))
+    # PP-OCRv4 Chinese recognizer for "Pinyin & arti" (REQ-30).
+    hanzi_model: Path = field(
+        default_factory=lambda: Path("models/ppocr-v4-rec/ch_PP-OCRv4_rec_infer.onnx")
+    )
     # Whisper speech-to-text for Rekam kelas (REQ-25).
     whisper_dir: Path = field(default_factory=lambda: Path("models/whisper"))
     whisper_model: str = "small"
@@ -138,6 +142,11 @@ class Settings:
             trust_proxy=os.environ.get("PAPAN_PERCAYA_PROXY", "0") == "1",
             formula_model_dir=Path(os.environ.get("PAPAN_MODEL_RUMUS", "models/pix2text-mfr-1.5")),
             video_dir=Path(os.environ.get("PAPAN_VIDEO", "video")),
+            hanzi_model=Path(
+                os.environ.get(
+                    "PAPAN_MODEL_HANZI", "models/ppocr-v4-rec/ch_PP-OCRv4_rec_infer.onnx"
+                )
+            ),
             whisper_dir=Path(os.environ.get("PAPAN_MODEL_SUARA", "models/whisper")),
             whisper_model=os.environ.get("PAPAN_WHISPER", "small"),
         )

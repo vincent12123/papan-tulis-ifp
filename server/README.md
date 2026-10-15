@@ -63,6 +63,41 @@ done
 SHA-256 yang diuji: encoder `080a3f66…610b`, decoder `917deb98…2f2a`,
 tokenizer `4ffbeb21…758a`. Lokasi lain: `PAPAN_MODEL_RUMUS` di `.env`.
 
+## Pengenal Hanzi (REQ-30, Checkpoint 16)
+
+Tulisan Mandarin dibaca oleh model pengenal teks **PP-OCRv4** (PaddleOCR,
+lisensi Apache-2.0, ±11 MB) dengan onnxruntime yang sudah ada — tanpa paket
+baru. Area dipotong per baris (sama dengan pengenal rumus), tiap baris dibaca
+tanpa pendeteksi teks (±0,03 detik). Bacaan **ditolak** bila keyakinan < 0,7
+atau tercampur huruf Latin/kana/angka, supaya panel menampilkan "tidak
+dikenali", bukan bacaan salah.
+
+Model diambil dari paket `rapidocr_onnxruntime` 1.4.4 di PyPI (tanpa memasang
+paketnya):
+
+```bash
+mkdir -p models/ppocr-v4-rec /tmp/rapidocr && cd /tmp/rapidocr
+.venv/bin/pip download --no-deps rapidocr_onnxruntime==1.4.4   # dari folder server
+python3 -m zipfile -e rapidocr_onnxruntime-1.4.4-py3-none-any.whl .
+cp rapidocr_onnxruntime/models/ch_PP-OCRv4_rec_infer.onnx <server>/models/ppocr-v4-rec/
+sha256sum <server>/models/ppocr-v4-rec/ch_PP-OCRv4_rec_infer.onnx
+# 48fc40f24f6d2a207a2b1091d3437eb3cc3eb6b676dc3ef9c37384005483683b
+```
+
+Lokasi lain: `PAPAN_MODEL_HANZI` di `.env`.
+
+**Uji akurasi dengan tulisan asli (AC-195).** Minta guru Mandarin menulis
+kalimat di panel (satu kalimat per tangkapan layar), potong gambarnya sebatas
+tulisan, beri nama berkas sesuai isinya (mis. `你好.png`, `你好-2.png`), taruh
+dalam satu folder, lalu:
+
+```bash
+.venv/bin/python -m app.cli uji-hanzi /path/folder-uji
+```
+
+Tiap gambar dicetak dengan bacaan, keyakinan, dan `benar` / `DITOLAK` /
+`SALAH`; baris terakhir menghitung semuanya. Gambar tidak disimpan ke mana pun.
+
 ## Video eksperimen (REQ-24)
 
 Taruh berkas MP4/WebM di folder `video/` (atau `PAPAN_VIDEO`) dan daftarkan di

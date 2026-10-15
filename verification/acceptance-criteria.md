@@ -189,7 +189,7 @@
 | AC-192 | REQ-30 | **Diberikan** AI mati atau terlalu lama, **ketika** Pinyin & arti, **maka** kartu tetap muncul dengan pinyin + arti per kata tanpa terjemahan kalimat (tanpa data contoh); tanpa jaringan/PIN → pesan menu pintar yang ada dan papan tidak berubah; tanpa PIN server menolak (401) | Negatif | AUTO | ☐ | |
 | AC-193 | REQ-30 | **Diberikan** kartu Mandarin, **ketika** dipindah/diubah ukuran/dihapus/Undo dan aplikasi dibuka ulang, **maka** perilaku seperti gambar dan kartu tersimpan utuh; terjemahan AI berlabel "Terjemahan AI — periksa sebelum dipakai" | Positif | AUTO | ☐ | |
 | AC-194 | REQ-30 | **Diberikan** panel dengan suara zh-CN, **ketika** Dengarkan / Pelan / ketuk kata, **maka** terdengar Hanzi yang sesuai; tanpa suara zh-CN tombol suara tersembunyi dan pesan cara memasang tampil | Positif / Negatif | AUTO + MANUAL | ☐ | |
-| AC-195 | REQ-30 | **Diberikan** 20 contoh Hanzi tulisan tangan guru Mandarin di panel, **ketika** dilingkari, **maka** pengenalan cukup akurat menurut guru (target usulan ≥ 16/20 benar; sisanya ditolak, bukan salah diam-diam) | Positif | MANUAL | ☐ | |
+| AC-195 | REQ-30 | **Diberikan** 20 contoh Hanzi tulisan tangan guru Mandarin di panel, **ketika** dilingkari, **maka** pengenalan cukup akurat menurut guru (target usulan ≥ 16/20 benar; sisanya ditolak, bukan salah diam-diam) | Positif | MANUAL | ⏳ | 2026-10-15 uji awal (bukan tulisan asli): 100 gambar dari font gaya tulisan tangan — rapi 60/60 benar; semi-kursif 15 benar, 2 ditolak, 3 salah; 草书 4/10/6 (`python -m app.cli uji-hanzi`, test_hanzi 11 test). Menunggu tulisan guru Mandarin di panel |
 
 ## H. Pengaturan (SPEC 5.8)
 

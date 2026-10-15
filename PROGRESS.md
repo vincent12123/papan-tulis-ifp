@@ -7,12 +7,13 @@
 
 ## Status Saat Ini
 
-- **Checkpoint aktif:** 15 Tabel → grafik selesai di kode (AC-180–AC-186 ✅, AC-187 ⏳ panel). Berikutnya: **Checkpoint 16 Mandarin (REQ-30, SPEC 1.13 disetujui)** — mulai dari uji akurasi pengenal Hanzi tulisan tangan di VPS dan cek suara zh-CN di panel Hisense; lalu uji semuanya di panel (Checkpoint 17).
+- **Checkpoint aktif:** 16 Mandarin — langkah 1 (pengenal Hanzi) selesai di kode server: `app/hanzi_reader.py` + `python -m app.cli uji-hanzi`; uji awal dengan font: rapi 60/60, kursif sebagian salah. **Berikutnya:** (a) pemilik/guru Mandarin mengirim tangkapan tulisan asli dari panel untuk AC-195; (b) cek suara zh-CN di panel Hisense (AC-194); (c) lanjut kamus (pypinyin, jieba, CC-CEDICT), endpoint, kartu `mandarin` di aplikasi. Model belum dipasang di VPS (perlu konfirmasi pemilik).
 - **Versi SPEC yang dipakai:** 1.13 (ux-flow 1.8)
 - **Terakhir diperbarui:** 2026-10-15 oleh AI
 - **Repo:** https://github.com/vincent12123/papan-tulis-ifp (publik, branch main)
 
 ## ✅ Sudah Selesai
+- **Checkpoint 16 langkah 1 — pengenal Hanzi (2026-10-15):** dibandingkan RapidOCR (pendeteksi + pengenal) vs pengenal saja per baris; dipilih model PP-OCRv4 rec ONNX langsung lewat onnxruntime (tanpa rapidocr/opencv). Ambang keyakinan 0,7 + tolak huruf non-Han. Model di `server/models/ppocr-v4-rec/` (SHA-256 di README). 11 pytest baru. Paket uji (rapidocr, opencv) sudah dicopot lagi dari venv lokal.
 - **Checkpoint 15 — Tabel → grafik (REQ-21, 2026-10-15):** `lib/table/` (table_data: baca angka koma/titik, seri, sumbu bulat; table_painter: sel + tanda sel bukan angka; chart_painter: Garis/Batang berkelompok/Titik, penanda bentuk berbeda per seri + legenda; table_editor: dialog Sisipkan tabel & Isi tabel). Objek `TableItem` (jenis `tabel`) dan `ChartItem` (jenis `grafik` + field `jenis`, salinan sel + id tabel) di `stroke.dart` + codec; `InkController.updateTable` (tabel + grafiknya satu Undo, `ReplaceMany`); ketukan sel di `InkCanvas.onTableCell`; tombol Tabel di bilah alat; tombol tabel di bawah tabel; grafik ditaruh di samping tabel tanpa menimpa. Tanpa server, tanpa dependency baru. 13 test baru (`test/table_test.dart`) + screenshot 10–12.
 - **Perbaikan bug lama (2026-10-15):** `InkPictureCache` menyimpan alias list item controller, sehingga item yang ditambah/diganti di tempat tidak digambar ulang selama halaman tanpa kuis/peraga berjalan (terbukti: test regresi gagal dengan kode lama). Kini menyimpan salinan list. Perlu dicek di panel bahwa goresan tetap tampil setelah jari diangkat.
 - **SPEC 1.13 (2026-10-15):** REQ-30 Mandarin disetujui (Checkpoint 16; AC-190–AC-195).
