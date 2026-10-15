@@ -99,6 +99,7 @@ void _text(
         color: color,
         fontWeight: weight,
         fontFamily: 'Roboto',
+        fontFamilyFallback: const ['Noto Sans CJK SC'],
       ),
       children: [
         if (icon != null) iconSpan(icon, size * 1.15, color),

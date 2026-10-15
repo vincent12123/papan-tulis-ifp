@@ -50,6 +50,10 @@ class FakeServer {
   String typesetImage = typesetPng;
   int typesetWidth = 40, typesetHeight = 10;
 
+  /// Picture of the solution; null = the same picture as [typesetImage].
+  String? solutionImage;
+  int solutionWidth = 40, solutionHeight = 10;
+
   /// What /rumus/kenali recognizes: `fungsi` (the video's formulas),
   /// `persamaan` (x² = 4), `ekspresi`, or null for nothing (tanpa_rumus).
   String? insightKind = 'fungsi';
@@ -211,6 +215,11 @@ class FakeServer {
           'penyelesaian': kind == 'persamaan' || kind == 'kimia'
               ? {
                   ...picture,
+                  if (solutionImage != null) ...{
+                    'gambar': solutionImage,
+                    'lebar': solutionWidth,
+                    'tinggi': solutionHeight,
+                  },
                   'baris': ['x = -2', 'x = 2'],
                 }
               : null,

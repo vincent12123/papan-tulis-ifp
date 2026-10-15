@@ -137,6 +137,8 @@ void _text(
     color: color,
     fontWeight: weight,
     fontFamily: 'Roboto',
+    // Arrows and subscripts (→, ₂) come from the system fallback font.
+    fontFamilyFallback: const ['Noto Sans CJK SC'],
   );
   final painter = TextPainter(
     text: TextSpan(

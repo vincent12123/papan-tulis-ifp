@@ -121,7 +121,12 @@ void _text(
   final painter = TextPainter(
     text: TextSpan(
       text: text,
-      style: TextStyle(fontSize: size, color: color, fontWeight: weight),
+      style: TextStyle(
+        fontSize: size,
+        color: color,
+        fontWeight: weight,
+        fontFamily: 'Roboto',
+      ),
     ),
     textDirection: TextDirection.ltr,
   )..layout();

@@ -73,6 +73,8 @@ void paintItem(
             fontSize: item.fontSize,
             color: item.color,
             height: 1.3,
+            fontFamily: 'Roboto',
+            fontFamilyFallback: const ['Noto Sans CJK SC'],
           ),
         ),
         textDirection: TextDirection.ltr,
